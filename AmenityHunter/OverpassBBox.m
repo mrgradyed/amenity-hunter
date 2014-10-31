@@ -151,6 +151,8 @@
 - (NSString *)overpassString
 {
     // This method converts the BBox to a string usable in the OverpassQL queries.
+    // String format: %g is like %f but trims zeros after the point and uses exponential notation
+    // for big numbers.
     NSString *overpassString =
         [NSString stringWithFormat:@"(%g, %g, %g, %g)", self.lowestLatitude, self.lowestLongitude,
                                    self.highestLatitude, self.highestLongitude];
