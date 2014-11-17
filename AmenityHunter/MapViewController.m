@@ -7,6 +7,7 @@
 //
 
 #import "MapViewController.h"
+#import "OverpassAPI.h"
 
 @import MapKit;
 
@@ -35,7 +36,23 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleFetchedOverpassData:)
+                                                 name:gDataFetchedNotification
+                                               object:nil];
+
+    [self requestAmenitiesDataFetch];
 }
+
+- (void)handleFetchedOverpassData:(NSNotification *)notification
+{
+    NSLog(@"%s NOT IMPLEMENTED", __PRETTY_FUNCTION__);
+}
+
+- (void)requestAmenitiesDataFetch { NSLog(@"%s NOT IMPLEMENTED", __PRETTY_FUNCTION__); }
+
+- (void)dealloc { [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:nil]; }
 
 - (void)didReceiveMemoryWarning
 {

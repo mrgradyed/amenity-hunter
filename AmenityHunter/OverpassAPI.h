@@ -7,8 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+
 @class Amenity;
 @class OverpassBBox;
+
+extern NSString *const gDataFetchedNotification;
 
 @interface OverpassAPI : NSObject
 

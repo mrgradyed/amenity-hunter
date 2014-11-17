@@ -9,9 +9,11 @@
 #import "OverpassAPI.h"
 #import "OverpassBBox.h"
 
-static NSString *overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
-static NSString *overpassFormat = @"json";
-static int overpassTimeout = 25;
+NSString *const gDataFetchedNotification = @"OverpassDataFetchedNotification";
+
+static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
+static NSString *const overpassFormat = @"json";
+static int const overpassTimeout = 25;
 
 @interface OverpassAPI ()
 
