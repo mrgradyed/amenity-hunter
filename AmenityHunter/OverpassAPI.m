@@ -9,7 +9,7 @@
 #import "OverpassAPI.h"
 #import "OverpassBBox.h"
 
-NSString *const gDataFetchedNotification = @"OverpassDataFetchedNotification";
+NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 
 static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
 static NSString *const overpassFormat = @"json";
@@ -32,7 +32,7 @@ static int const overpassTimeout = 25;
     _lastFetchedData = lastFetchedData;
 
     [[NSNotificationCenter defaultCenter]
-        postNotification:[NSNotification notificationWithName:@"OverpassDataReady"
+        postNotification:[NSNotification notificationWithName:gOverpassDataFetchedNotification
                                                        object:self
                                                      userInfo:_lastFetchedData]];
 }
@@ -83,11 +83,6 @@ static int const overpassTimeout = 25;
     {
         _ephemeralSession = [NSURLSession
             sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
-
-        _boundingBox = [[OverpassBBox alloc] initWithLowestLatitude:-2.0
-                                                    lowestLongitude:-2.0
-                                                    highestLatitude:2.0
-                                                   highestLongitude:2.0];
     }
 
     return self;
@@ -95,7 +90,7 @@ static int const overpassTimeout = 25;
 
 #pragma mark - INSTANCE METHODS
 
-- (void)startFetching
+- (void)startFetchingAmenitiesData
 {
     NSString *requestString =
         [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",

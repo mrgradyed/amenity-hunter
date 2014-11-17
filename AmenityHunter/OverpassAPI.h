@@ -11,7 +11,7 @@
 @class Amenity;
 @class OverpassBBox;
 
-extern NSString *const gDataFetchedNotification;
+extern NSString *const gOverpassDataFetchedNotification;
 
 @interface OverpassAPI : NSObject
 
@@ -20,6 +20,6 @@ extern NSString *const gDataFetchedNotification;
 
 + (instancetype)sharedInstance;
 
-- (void)startFetching;
+- (void)startFetchingAmenitiesData;
 
 @end
