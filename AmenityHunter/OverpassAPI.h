@@ -18,6 +18,9 @@ extern NSString *const gOverpassDataFetchedNotification;
 @property(nonatomic, strong) NSString *amenityType;
 @property(nonatomic, strong) OverpassBBox *boundingBox;
 
+// This method creates an instance of this class once and only once
+// for the entire lifetime of the application.
+// Do NOT use the init method to create an instance, it will just return an exception.
 + (instancetype)sharedInstance;
 
 - (void)startFetchingAmenitiesData;

@@ -29,6 +29,8 @@
     if (!_locationManager)
     {
         _locationManager = [[CLLocationManager alloc] init];
+
+        _locationManager.delegate = self;
     }
 
     return _locationManager;
@@ -39,11 +41,11 @@
     // Configure the map view upon setting it.
 
     _mapView = mapView;
+    _mapView.showsPointsOfInterest = NO;
 
     [self askForLocationPermission];
 
     _mapView.showsUserLocation = YES;
-    _mapView.showsPointsOfInterest = NO;
     _mapView.userTrackingMode = MKUserTrackingModeFollowWithHeading;
 }
 
@@ -70,6 +72,14 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - CLLocationManagerDelegate
+
+- (void)locationManager:(CLLocationManager *)manager
+    didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+}
+
 #pragma mark - UTILITY METHODS
 
 - (void)askForLocationPermission
@@ -77,12 +87,15 @@
     // iOS 7 doesn't have this selector, let's check.
     if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
     {
-        // From Apple docs: this method runs asynchronously and prompts the user to grant permission
+        // iOS 8.0 and later ONLY.
+
+        // Apple docs: this method runs asynchronously and prompts the user to grant permission
         // to the app to use location services. The user prompt contains the text from the
         // NSLocationWhenInUseUsageDescription key in your app’s Info.plist file, and the presence
         // of that key is required when calling this method.
-
-        // iOS 8.0 and later ONLY.
+        // If the current authorization status is anything other than
+        // kCLAuthorizationStatusNotDetermined, this method does nothing and does not call the
+        // locationManager:didChangeAuthorizationStatus: method.
 
         [self.locationManager requestWhenInUseAuthorization];
     }
@@ -90,7 +103,7 @@
 
 - (void)handleFetchedOverpassData:(NSNotification *)notification
 {
-    NSLog(@"%s NOT IMPLEMENTED", __PRETTY_FUNCTION__);
+    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
 }
 
 - (void)requestAmenitiesDataFetch { [[OverpassAPI sharedInstance] startFetchingAmenitiesData]; }
