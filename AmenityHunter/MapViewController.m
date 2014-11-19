@@ -13,7 +13,7 @@
 @import MapKit;
 @import CoreLocation;
 
-@interface MapViewController () <MKMapViewDelegate, CLLocationManagerDelegate>
+@interface MapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
 @property(weak, nonatomic) IBOutlet MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
@@ -57,7 +57,7 @@
     // Do any additional setup after loading the view.
 
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleFetchedOverpassData:)
+                                             selector:@selector(handleOverpassData:)
                                                  name:gOverpassDataFetchedNotification
                                                object:nil];
 
@@ -77,6 +77,51 @@
 - (void)locationManager:(CLLocationManager *)manager
     didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
+    if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
+    {
+        UIAlertView *alertView =
+            [[UIAlertView alloc] initWithTitle:@"Location Settings"
+                                       message:@"Amenity Hunter cannot access your location, your "
+                                       @"location is needed to show amenities near you."
+                                      delegate:self
+                             cancelButtonTitle:@"Continue anyway"
+                             otherButtonTitles:@"Change location settings", nil];
+
+        [alertView show];
+    }
+    else if (status == kCLAuthorizationStatusNotDetermined)
+    {
+
+        [self askForLocationPermission];
+    }
+
+#if DEBUG
+    switch (status)
+    {
+    case kCLAuthorizationStatusAuthorizedAlways:
+        NSLog(@"kCLAuthorizationStatusAuthorizedAlways");
+        break;
+    case kCLAuthorizationStatusAuthorizedWhenInUse:
+        NSLog(@"kCLAuthorizationStatusAuthorizedWhenInUse");
+        break;
+    case kCLAuthorizationStatusDenied:
+        NSLog(@"kCLAuthorizationStatusDenied");
+        break;
+    case kCLAuthorizationStatusRestricted:
+        NSLog(@"kCLAuthorizationStatusRestricted");
+        break;
+    default:
+        break;
+    }
+#endif
+}
+
+#pragma mark - UIAlertViewDelegate
+
+- (void)alertViewCancel:(UIAlertView *)alertView { NSLog(@"%s TO DO", __PRETTY_FUNCTION__); }
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
     NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
 }
 
@@ -89,19 +134,23 @@
     {
         // iOS 8.0 and later ONLY.
 
-        // Apple docs: this method runs asynchronously and prompts the user to grant permission
-        // to the app to use location services. The user prompt contains the text from the
-        // NSLocationWhenInUseUsageDescription key in your app’s Info.plist file, and the presence
+        // Apple docs: this method runs asynchronously and prompts the user to grant
+        // permission
+        // to the app to use location services. The user prompt contains the text
+        // from the
+        // NSLocationWhenInUseUsageDescription key in your app’s Info.plist file,
+        // and the presence
         // of that key is required when calling this method.
         // If the current authorization status is anything other than
-        // kCLAuthorizationStatusNotDetermined, this method does nothing and does not call the
+        // kCLAuthorizationStatusNotDetermined, this method does nothing and does
+        // not call the
         // locationManager:didChangeAuthorizationStatus: method.
 
         [self.locationManager requestWhenInUseAuthorization];
     }
 }
 
-- (void)handleFetchedOverpassData:(NSNotification *)notification
+- (void)handleOverpassData:(NSNotification *)notification
 {
     NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
 }
