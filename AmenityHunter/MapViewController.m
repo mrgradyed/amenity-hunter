@@ -17,6 +17,8 @@
 
 @property(weak, nonatomic) IBOutlet MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
+@property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
+@property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
 
 @end
 
@@ -34,6 +36,29 @@
     }
 
     return _locationManager;
+}
+
+- (UIAlertView *)locationDeniedAlertView
+{
+    if (!_locationDeniedAlertView)
+    {
+        // Warning: UIAlertView is deprecated in iOS 8.
+        _locationDeniedAlertView =
+            [[UIAlertView alloc] initWithTitle:@"Location Settings"
+                                       message:@"Amenity Hunter cannot access your location, your "
+                                       @"location is needed to show amenities near you."
+                                      delegate:self
+                             cancelButtonTitle:@"Continue anyway"
+                             otherButtonTitles:@"Change location settings", nil];
+    }
+
+    return _locationDeniedAlertView;
+}
+
+- (UIAlertController *)locationDeniedAlertController
+{
+    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+    return nil;
 }
 
 - (void)setMapView:(MKMapView *)mapView
@@ -79,19 +104,10 @@
 {
     if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
     {
-        UIAlertView *alertView =
-            [[UIAlertView alloc] initWithTitle:@"Location Settings"
-                                       message:@"Amenity Hunter cannot access your location, your "
-                                       @"location is needed to show amenities near you."
-                                      delegate:self
-                             cancelButtonTitle:@"Continue anyway"
-                             otherButtonTitles:@"Change location settings", nil];
-
-        [alertView show];
+        [self.locationDeniedAlertView show];
     }
     else if (status == kCLAuthorizationStatusNotDetermined)
     {
-
         [self askForLocationPermission];
     }
 
