@@ -113,8 +113,6 @@
                                              selector:@selector(handleOverpassData:)
                                                  name:gOverpassDataFetchedNotification
                                                object:nil];
-
-    [self requestAmenitiesDataFetch];
 }
 
 - (void)dealloc { [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:nil]; }
@@ -123,6 +121,22 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - CLLocationManagerDelegate
+
+- (void)mapViewDidFinishRenderingMap:(MKMapView *)mapView fullyRendered:(BOOL)fullyRendered
+{
+    OverpassAPI *overpassAPIsharedInstance = [OverpassAPI sharedInstance];
+
+    OverpassBBox *currentBBox = [self overpassBBoxFromVisibleMapArea];
+
+    overpassAPIsharedInstance.boundingBox = currentBBox;
+
+#warning This is just an example. The amenity type should be chosen by the user via the UI.
+    overpassAPIsharedInstance.amenityType = @"toilets";
+
+    [overpassAPIsharedInstance startFetchingAmenitiesData];
 }
 
 #pragma mark - CLLocationManagerDelegate
