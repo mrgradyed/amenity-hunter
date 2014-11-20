@@ -42,14 +42,14 @@
 {
     if (!_locationDeniedAlertView)
     {
-        // Warning: UIAlertView is deprecated in iOS 8.
+        // UIAlertView is deprecated in iOS 8. We should use UIAlertController.
         _locationDeniedAlertView =
             [[UIAlertView alloc] initWithTitle:@"Location Settings"
-                                       message:@"Amenity Hunter cannot access your location, your "
-                                       @"location is needed to show amenities near you."
+                                       message:@"Amenity Hunter cannot access your location."
+                                       @"Your location is needed to show amenities near you."
                                       delegate:self
-                             cancelButtonTitle:@"Continue anyway"
-                             otherButtonTitles:@"Change location settings", nil];
+                             cancelButtonTitle:@"OK"
+                             otherButtonTitles:nil];
     }
 
     return _locationDeniedAlertView;
@@ -57,8 +57,36 @@
 
 - (UIAlertController *)locationDeniedAlertController
 {
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
-    return nil;
+    if (!_locationDeniedAlertController)
+    {
+        _locationDeniedAlertController = [UIAlertController
+            alertControllerWithTitle:@"Location Settings"
+                             message:@"Amenity Hunter cannot access your location."
+                             @"Your location is needed to show amenities near you."
+                      preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction *canceButton = [UIAlertAction actionWithTitle:@"Continue anyway"
+                                                              style:UIAlertActionStyleCancel
+                                                            handler:nil];
+
+        UIAlertAction *settingsButton =
+            [UIAlertAction actionWithTitle:@"Change location settings"
+                                     style:UIAlertActionStyleDefault
+                                   handler:^(UIAlertAction *action) {
+
+                                       // UIApplicationOpenSettingsURLString is iOS 8.0 and later
+                                       // ONLY.
+                                       NSURL *settingsURL =
+                                           [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+
+                                       [[UIApplication sharedApplication] openURL:settingsURL];
+                                   }];
+
+        [_locationDeniedAlertController addAction:canceButton];
+        [_locationDeniedAlertController addAction:settingsButton];
+    }
+
+    return _locationDeniedAlertController;
 }
 
 - (void)setMapView:(MKMapView *)mapView
@@ -104,7 +132,18 @@
 {
     if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
     {
-        [self.locationDeniedAlertView show];
+        if ([UIAlertController class])
+        {
+            // iOS 8 and higher.
+            [self presentViewController:self.locationDeniedAlertController
+                               animated:YES
+                             completion:nil];
+        }
+        else
+        {
+            // iOS 7 and lower.
+            [self.locationDeniedAlertView show];
+        }
     }
     else if (status == kCLAuthorizationStatusNotDetermined)
     {
@@ -148,8 +187,6 @@
     // iOS 7 doesn't have this selector, let's check.
     if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
     {
-        // iOS 8.0 and later ONLY.
-
         // Apple docs: this method runs asynchronously and prompts the user to grant
         // permission
         // to the app to use location services. The user prompt contains the text
@@ -162,6 +199,7 @@
         // not call the
         // locationManager:didChangeAuthorizationStatus: method.
 
+        // iOS 8.0 and later ONLY.
         [self.locationManager requestWhenInUseAuthorization];
     }
 }
