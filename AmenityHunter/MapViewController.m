@@ -99,7 +99,7 @@
     [self askForLocationPermission];
 
     _mapView.showsUserLocation = YES;
-    _mapView.userTrackingMode = MKUserTrackingModeFollowWithHeading;
+    _mapView.userTrackingMode = MKUserTrackingModeFollow;
 }
 
 #pragma mark - LIFECYCLE
@@ -207,6 +207,26 @@
 - (void)handleOverpassData:(NSNotification *)notification
 {
     NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+}
+
+- (OverpassBBox *)overpassBBoxFromVisibleMapArea
+{
+    MKMapRect visibleMapArea = self.mapView.visibleMapRect;
+
+    MKMapPoint bottomLeftCorner =
+        MKMapPointMake(MKMapRectGetMinX(visibleMapArea), MKMapRectGetMaxY(visibleMapArea));
+
+    MKMapPoint topRightCorner =
+        MKMapPointMake(MKMapRectGetMaxX(visibleMapArea), MKMapRectGetMinY(visibleMapArea));
+
+    CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
+
+    CLLocationCoordinate2D topRightCornerCoordinates = MKCoordinateForMapPoint(topRightCorner);
+
+    return [[OverpassBBox alloc] initWithLowestLatitude:bottomLeftCornerCoordinates.latitude
+                                        lowestLongitude:bottomLeftCornerCoordinates.longitude
+                                        highestLatitude:topRightCornerCoordinates.latitude
+                                       highestLongitude:topRightCornerCoordinates.longitude];
 }
 
 - (void)requestAmenitiesDataFetch { [[OverpassAPI sharedInstance] startFetchingAmenitiesData]; }
