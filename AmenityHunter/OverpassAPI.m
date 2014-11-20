@@ -100,7 +100,15 @@ static int const overpassTimeout = 25;
     if ([self.lastRequest isEqualToString:requestString])
     {
         self.lastFetchedData = self.lastFetchedData;
+
+        return;
     }
+
+    [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
+                                                           NSArray *downloadTasks){
+
+        [downloadTasks makeObjectsPerformSelector:@selector(cancel)];
+    }];
 
     NSURL *requestURL =
         [NSURL URLWithString:[requestString
@@ -119,7 +127,6 @@ static int const overpassTimeout = 25;
                                      options:0
                                        error:nil];
                   }
-
               }] resume];
 }
 
