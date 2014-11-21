@@ -123,7 +123,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - CLLocationManagerDelegate
+#pragma mark - MKMapViewDelegate
 
 - (void)mapViewDidFinishRenderingMap:(MKMapView *)mapView fullyRendered:(BOOL)fullyRendered
 {
@@ -134,7 +134,7 @@
     overpassAPIsharedInstance.boundingBox = currentBBox;
 
 #warning This is just an example. The amenity type should be chosen by the user via the UI.
-    overpassAPIsharedInstance.amenityType = @"toilets";
+    overpassAPIsharedInstance.amenityType = @"bar";
 
     [overpassAPIsharedInstance startFetchingAmenitiesData];
 }
@@ -220,7 +220,19 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+    NSLog(@"%s INCOMPLETE IMPLEMENTATION", __PRETTY_FUNCTION__);
+
+    NSLog(@"%@", notification.userInfo);
+
+    id elements = [notification.userInfo valueForKey:@"elements"];
+
+    double elementLatitude;
+    double elementLongitude;
+    for (id element in elements)
+    {
+        elementLatitude = [[element valueForKey:@"lat"] doubleValue];
+        elementLongitude = [[element valueForKey:@"lon"] doubleValue];
+    }
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
