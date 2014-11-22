@@ -7,9 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@class Amenity;
-@class OverpassBBox;
+#import "OverpassBBox.h"
 
 extern NSString *const gOverpassDataFetchedNotification;
 
@@ -20,7 +18,8 @@ extern NSString *const gOverpassDataFetchedNotification;
 
 // This method creates an instance of this class once and only once
 // for the entire lifetime of the application.
-// Do NOT use the init method to create an instance, it will just return an exception.
+// Do NOT use the init method to create an instance, it will just return an
+// exception.
 + (instancetype)sharedInstance;
 
 - (void)startFetchingAmenitiesData;

@@ -7,7 +7,7 @@
 //
 
 #import "OverpassAPI.h"
-#import "OverpassBBox.h"
+
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 

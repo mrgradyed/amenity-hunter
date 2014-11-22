@@ -189,11 +189,6 @@
 
 - (void)alertViewCancel:(UIAlertView *)alertView { NSLog(@"%s TO DO", __PRETTY_FUNCTION__); }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
-}
-
 #pragma mark - UTILITY METHODS
 
 - (void)askForLocationPermission
@@ -232,6 +227,8 @@
     {
         elementLatitude = [[element valueForKey:@"lat"] doubleValue];
         elementLongitude = [[element valueForKey:@"lon"] doubleValue];
+
+        [MKAnnotationView alloc];
     }
 }
 
