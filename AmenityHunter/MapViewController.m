@@ -9,6 +9,7 @@
 #import "MapViewController.h"
 #import "OverpassAPI.h"
 #import "OverpassBBox.h"
+#import "AmenityAnnotation.h"
 
 @import MapKit;
 @import CoreLocation;
@@ -223,12 +224,14 @@
 
     double elementLatitude;
     double elementLongitude;
+
     for (id element in elements)
     {
         elementLatitude = [[element valueForKey:@"lat"] doubleValue];
         elementLongitude = [[element valueForKey:@"lon"] doubleValue];
 
-        [MKAnnotationView alloc];
+        AmenityAnnotation *annotation =
+            [[AmenityAnnotation alloc] initWithLatitude:elementLatitude Longitude:elementLongitude];
     }
 }
 

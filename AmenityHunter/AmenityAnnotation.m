@@ -56,4 +56,30 @@
     }
 }
 
+// Designated init
+- (instancetype)initWithLatitude:(double)latitude Longitude:(double)longitude
+{
+    self = [super init];
+
+    if (self)
+    {
+        self.latitude = latitude;
+        self.latitude = longitude;
+    }
+
+    return self;
+}
+
+- (instancetype)init
+{
+    self = [super init];
+
+    if (self)
+    {
+        self = [self initWithLatitude:0.0 Longitude:0.0];
+    }
+
+    return self;
+}
+
 @end
