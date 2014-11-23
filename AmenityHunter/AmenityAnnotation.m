@@ -8,6 +8,8 @@
 
 #import "AmenityAnnotation.h"
 
+NSString *const gAmenityAnnotationViewReuseIdentifier = @"AmenityAnnotationViewReuseIdentifier";
+
 @interface AmenityAnnotation ()
 
 @property(nonatomic) CLLocationCoordinate2D coordinate;

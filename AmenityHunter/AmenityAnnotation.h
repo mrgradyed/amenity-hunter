@@ -6,9 +6,10 @@
 //  Copyright (c) 2014 Emiliano D'Alterio. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
+@import Foundation;
 @import MapKit;
+
+extern NSString *const gAmenityAnnotationViewReuseIdentifier;
 
 @interface AmenityAnnotation : NSObject <MKAnnotation>
 

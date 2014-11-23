@@ -96,16 +96,10 @@ static int const overpassTimeout = 25;
                                    overpassEndpoint, overpassFormat, overpassTimeout,
                                    self.amenityType, [self.boundingBox overpassString]];
 
-    NSLog(@"%@", requestString);
-
     [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
                                                            NSArray *downloadTasks) {
 
-        NSLog(@"Current Download Tasks: %@", downloadTasks);
-
         [downloadTasks makeObjectsPerformSelector:@selector(cancel)];
-
-        NSLog(@"Cancelling Download Tasks: %@", downloadTasks);
 
     }];
 

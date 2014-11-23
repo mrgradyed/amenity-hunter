@@ -151,6 +151,20 @@
     [overpassAPIsharedInstance startFetchingAmenitiesData];
 }
 
+- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
+{
+    MKAnnotationView *annotationView =
+        [mapView dequeueReusableAnnotationViewWithIdentifier:gAmenityAnnotationViewReuseIdentifier];
+
+    if (!annotationView)
+    {
+        annotationView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation
+                                                         reuseIdentifier:@"AmenityAnnotationID"];
+    }
+
+    return annotationView;
+}
+
 #pragma mark - CLLocationManagerDelegate
 
 - (void)locationManager:(CLLocationManager *)manager
@@ -227,6 +241,7 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
+
     NSLog(@"%@", notification.userInfo);
 
     [self.mapView removeAnnotations:self.mapAmenityAnnotations];
@@ -249,9 +264,9 @@
             [[AmenityAnnotation alloc] initWithLatitude:elementLatitude Longitude:elementLongitude];
 
         [self.mapAmenityAnnotations addObject:annotation];
-
-        [self.mapView addAnnotation:annotation];
     }
+
+    [self.mapView addAnnotations:self.mapAmenityAnnotations];
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
