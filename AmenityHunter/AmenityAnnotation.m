@@ -24,12 +24,12 @@
     return _coordinate;
 }
 
-- (void)setLatitude:(double)lowestLatitude
+- (void)setLatitude:(double)latitude
 {
     // We need to check that latitude is in the valid range before setting it.
-    if (-90.0 <= lowestLatitude <= 90.0)
+    if (-90.0 <= latitude <= 90.0)
     {
-        _latitude = lowestLatitude;
+        _latitude = latitude;
     }
     else
     {
@@ -40,12 +40,12 @@
     }
 }
 
-- (void)setLongitude:(double)lowestLongitude
+- (void)setLongitude:(double)longitude
 {
     // We need to check that longitude is in the valid range before setting it.
-    if (-180.0 <= lowestLongitude <= 180.0)
+    if (-180.0 <= longitude <= 180.0)
     {
-        _longitude = lowestLongitude;
+        _longitude = longitude;
     }
     else
     {
@@ -64,7 +64,7 @@
     if (self)
     {
         self.latitude = latitude;
-        self.latitude = longitude;
+        self.longitude = longitude;
     }
 
     return self;
