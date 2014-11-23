@@ -20,6 +20,7 @@
 @property(strong, nonatomic) CLLocationManager *locationManager;
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
+@property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 
 @end
 
@@ -90,6 +91,16 @@
     return _locationDeniedAlertController;
 }
 
+- (NSMutableArray *)mapAmenityAnnotations
+{
+    if (!_mapAmenityAnnotations)
+    {
+        _mapAmenityAnnotations = [[NSMutableArray alloc] init];
+    }
+
+    return _mapAmenityAnnotations;
+}
+
 - (void)setMapView:(MKMapView *)mapView
 {
     // Configure the map view upon setting it.
@@ -126,7 +137,7 @@
 
 #pragma mark - MKMapViewDelegate
 
-- (void)mapViewDidFinishRenderingMap:(MKMapView *)mapView fullyRendered:(BOOL)fullyRendered
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
     OverpassAPI *overpassAPIsharedInstance = [OverpassAPI sharedInstance];
 
@@ -216,22 +227,30 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-    NSLog(@"%s INCOMPLETE IMPLEMENTATION", __PRETTY_FUNCTION__);
-
     NSLog(@"%@", notification.userInfo);
+
+    [self.mapView removeAnnotations:self.mapAmenityAnnotations];
+
+    self.mapAmenityAnnotations = nil;
 
     id elements = [notification.userInfo valueForKey:@"elements"];
 
     double elementLatitude;
     double elementLongitude;
 
+    AmenityAnnotation *annotation;
+
     for (id element in elements)
     {
         elementLatitude = [[element valueForKey:@"lat"] doubleValue];
         elementLongitude = [[element valueForKey:@"lon"] doubleValue];
 
-        AmenityAnnotation *annotation =
+        annotation =
             [[AmenityAnnotation alloc] initWithLatitude:elementLatitude Longitude:elementLongitude];
+
+        [self.mapAmenityAnnotations addObject:annotation];
+
+        [self.mapView addAnnotation:annotation];
     }
 }
 

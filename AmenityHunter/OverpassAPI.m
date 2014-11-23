@@ -8,7 +8,6 @@
 
 #import "OverpassAPI.h"
 
-
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 
 static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
@@ -97,17 +96,17 @@ static int const overpassTimeout = 25;
                                    overpassEndpoint, overpassFormat, overpassTimeout,
                                    self.amenityType, [self.boundingBox overpassString]];
 
-    if ([self.lastRequest isEqualToString:requestString])
-    {
-        self.lastFetchedData = self.lastFetchedData;
-
-        return;
-    }
+    NSLog(@"%@", requestString);
 
     [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
-                                                           NSArray *downloadTasks){
+                                                           NSArray *downloadTasks) {
+
+        NSLog(@"Current Download Tasks: %@", downloadTasks);
 
         [downloadTasks makeObjectsPerformSelector:@selector(cancel)];
+
+        NSLog(@"Cancelling Download Tasks: %@", downloadTasks);
+
     }];
 
     NSURL *requestURL =
