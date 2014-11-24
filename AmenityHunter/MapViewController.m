@@ -241,7 +241,6 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-
     NSLog(@"%@", notification.userInfo);
 
     [self.mapView removeAnnotations:self.mapAmenityAnnotations];
@@ -250,18 +249,26 @@
 
     id elements = [notification.userInfo valueForKey:@"elements"];
 
-    double elementLatitude;
-    double elementLongitude;
+    id elementLatitude;
+    id elementLongitude;
+    id elementName;
+    id elementType;
 
     AmenityAnnotation *annotation;
 
     for (id element in elements)
     {
-        elementLatitude = [[element valueForKey:@"lat"] doubleValue];
-        elementLongitude = [[element valueForKey:@"lon"] doubleValue];
+        elementLatitude = [element valueForKey:@"lat"];
+        elementLongitude = [element valueForKey:@"lon"];
 
-        annotation =
-            [[AmenityAnnotation alloc] initWithLatitude:elementLatitude Longitude:elementLongitude];
+        elementName = [element valueForKeyPath:@"tags.name"];
+        elementType = [element valueForKeyPath:@"tags.amenity"];
+
+        annotation = [[AmenityAnnotation alloc] initWithLatitude:[elementLatitude doubleValue]
+                                                       Longitude:[elementLongitude doubleValue]];
+
+        annotation.name = elementName;
+        annotation.type = elementType;
 
         [self.mapAmenityAnnotations addObject:annotation];
     }

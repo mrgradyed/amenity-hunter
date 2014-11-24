@@ -14,6 +14,9 @@ NSString *const gAmenityAnnotationViewReuseIdentifier = @"AmenityAnnotationViewR
 
 @property(nonatomic) CLLocationCoordinate2D coordinate;
 
+@property(nonatomic, copy) NSString *title;
+@property(nonatomic, copy) NSString *subtitle;
+
 @end
 
 @implementation AmenityAnnotation
@@ -56,6 +59,19 @@ NSString *const gAmenityAnnotationViewReuseIdentifier = @"AmenityAnnotationViewR
                                        reason:@"lowestLongitude MUST be between [-180.0, 180.0]"
                                      userInfo:nil];
     }
+}
+
+- (void)setName:(NSString *)name
+{
+    _name = name;
+    self.title = name;
+}
+
+- (void)setType:(NSString *)amenityType
+{
+
+    _type = amenityType;
+    self.subtitle = amenityType;
 }
 
 // Designated init
