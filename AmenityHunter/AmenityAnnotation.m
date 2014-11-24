@@ -1,8 +1,8 @@
 //
-//  Amenity.m
+//  AmenityAnnotation.m
 //  AmenityHunter
 //
-//  Created by emi on 22/11/14.
+//  Created by emi on 24/11/14.
 //  Copyright (c) 2014 Emiliano D'Alterio. All rights reserved.
 //
 
@@ -10,79 +10,19 @@
 
 NSString *const gAmenityAnnotationViewReuseIdentifier = @"AmenityAnnotationViewReuseIdentifier";
 
-@interface AmenityAnnotation ()
-
-@property(nonatomic) CLLocationCoordinate2D coordinate;
-
-@property(nonatomic, copy) NSString *title;
-@property(nonatomic, copy) NSString *subtitle;
-
-@end
-
 @implementation AmenityAnnotation
 
-- (CLLocationCoordinate2D)coordinate
-{
-    _coordinate.latitude = self.latitude;
-    _coordinate.longitude = self.longitude;
+#pragma mark - DESIGNATED INIT
 
-    return _coordinate;
-}
-
-- (void)setLatitude:(double)latitude
-{
-    // We need to check that latitude is in the valid range before setting it.
-    if (-90.0 <= latitude <= 90.0)
-    {
-        _latitude = latitude;
-    }
-    else
-    {
-        // Invalid latitude value, raise an exception.
-        @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"lowestLatitude MUST be between [-90.0, 90.0]"
-                                     userInfo:nil];
-    }
-}
-
-- (void)setLongitude:(double)longitude
-{
-    // We need to check that longitude is in the valid range before setting it.
-    if (-180.0 <= longitude <= 180.0)
-    {
-        _longitude = longitude;
-    }
-    else
-    {
-        // Invalid longitude value, raise an exception.
-        @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"lowestLongitude MUST be between [-180.0, 180.0]"
-                                     userInfo:nil];
-    }
-}
-
-- (void)setName:(NSString *)name
-{
-    _name = name;
-    self.title = name;
-}
-
-- (void)setType:(NSString *)amenityType
-{
-
-    _type = amenityType;
-    self.subtitle = amenityType;
-}
-
-// Designated init
 - (instancetype)initWithLatitude:(double)latitude Longitude:(double)longitude
 {
     self = [super init];
 
     if (self)
     {
-        self.latitude = latitude;
-        self.longitude = longitude;
+        CLLocationCoordinate2D amenityPosition = CLLocationCoordinate2DMake(latitude, longitude);
+
+        self.coordinate = amenityPosition;
     }
 
     return self;

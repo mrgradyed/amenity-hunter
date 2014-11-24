@@ -38,7 +38,7 @@
 {
     // Return the number of sections.
 
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+#warning INCOMPLETE IMPLEMENTATION.
 
     return 1;
 }
@@ -47,7 +47,7 @@
 {
     // Return the number of rows in the section.
 
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+#warning INCOMPLETE IMPLEMENTATION.
 
     return 10;
 }

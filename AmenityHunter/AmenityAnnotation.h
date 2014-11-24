@@ -1,34 +1,18 @@
 //
-//  Amenity.h
+//  AmenityAnnotation.h
 //  AmenityHunter
 //
-//  Created by emi on 22/11/14.
+//  Created by emi on 24/11/14.
 //  Copyright (c) 2014 Emiliano D'Alterio. All rights reserved.
 //
 
-@import Foundation;
-@import MapKit;
+#import <MapKit/MapKit.h>
 
 extern NSString *const gAmenityAnnotationViewReuseIdentifier;
 
-@interface AmenityAnnotation : NSObject <MKAnnotation>
+@interface AmenityAnnotation : MKPointAnnotation
 
-#pragma mark - MKAnnotation protocol
-
-@property(nonatomic, readonly) CLLocationCoordinate2D coordinate;
-
-@property(nonatomic, readonly, copy) NSString *title;
-@property(nonatomic, readonly, copy) NSString *subtitle;
-
-#pragma mark - Public properties
-
-@property(nonatomic) double latitude;
-@property(nonatomic) double longitude;
-
-@property(nonatomic) NSString *name;
-@property(nonatomic) NSString *type;
-
-#pragma mark - Designated init
+#pragma mark - DESIGNATED INIT
 
 - (instancetype)initWithLatitude:(double)latitude Longitude:(double)longitude;
 

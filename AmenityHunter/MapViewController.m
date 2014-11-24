@@ -106,7 +106,6 @@
     // Configure the map view upon setting it.
 
     _mapView = mapView;
-    _mapView.showsPointsOfInterest = NO;
 
     [self askForLocationPermission];
 
@@ -137,7 +136,7 @@
 
 #pragma mark - MKMapViewDelegate
 
-- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
+- (void)mapViewDidFinishRenderingMap:(MKMapView *)mapView fullyRendered:(BOOL)fullyRendered
 {
     OverpassAPI *overpassAPIsharedInstance = [OverpassAPI sharedInstance];
 
@@ -146,7 +145,7 @@
     overpassAPIsharedInstance.boundingBox = currentBBox;
 
 #warning This is just an example. The amenity type should be chosen by the user via the UI.
-    overpassAPIsharedInstance.amenityType = @"bar";
+    overpassAPIsharedInstance.amenityType = @"cinema";
 
     [overpassAPIsharedInstance startFetchingAmenitiesData];
 }
@@ -213,7 +212,10 @@
 
 #pragma mark - UIAlertViewDelegate
 
-- (void)alertViewCancel:(UIAlertView *)alertView { NSLog(@"%s TO DO", __PRETTY_FUNCTION__); }
+- (void)alertViewCancel:(UIAlertView *)alertView
+{
+#warning INCOMPLETE IMPLEMENTATION.
+}
 
 #pragma mark - UTILITY METHODS
 
@@ -241,7 +243,9 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
+#if DEBUG
     NSLog(@"%@", notification.userInfo);
+#endif
 
     [self.mapView removeAnnotations:self.mapAmenityAnnotations];
 
@@ -267,13 +271,13 @@
         annotation = [[AmenityAnnotation alloc] initWithLatitude:[elementLatitude doubleValue]
                                                        Longitude:[elementLongitude doubleValue]];
 
-        annotation.name = elementName;
-        annotation.type = elementType;
+        annotation.title = elementName;
+        annotation.subtitle = elementType;
 
         [self.mapAmenityAnnotations addObject:annotation];
     }
 
-    [self.mapView addAnnotations:self.mapAmenityAnnotations];
+    [self.mapView showAnnotations:self.mapAmenityAnnotations animated:YES];
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
