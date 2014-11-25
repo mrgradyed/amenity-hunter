@@ -60,7 +60,7 @@
 
     // Configure the cell...
 
-    NSLog(@"%s TO DO", __PRETTY_FUNCTION__);
+#warning INCOMPLETE IMPLEMENTATION.
 
     return cell;
 }

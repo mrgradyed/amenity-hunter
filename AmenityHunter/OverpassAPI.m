@@ -96,12 +96,9 @@ static int const overpassTimeout = 25;
                                    overpassEndpoint, overpassFormat, overpassTimeout,
                                    self.amenityType, [self.boundingBox overpassString]];
 
-    [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
-                                                           NSArray *downloadTasks) {
-
-        [downloadTasks makeObjectsPerformSelector:@selector(cancel)];
-
-    }];
+#if DEBUG
+    NSLog(@"START FETCHING REQUEST:%@", requestString);
+#endif
 
     NSURL *requestURL =
         [NSURL URLWithString:[requestString
@@ -119,6 +116,13 @@ static int const overpassTimeout = 25;
                           JSONObjectWithData:[NSData dataWithContentsOfURL:location]
                                      options:0
                                        error:nil];
+                  }
+                  else
+                  {
+                      #if DEBUG
+                      NSLog(@"ERROR while fetching with request %@", requestString);
+                      NSLog(@"%@", error.userInfo);
+                      #endif
                   }
               }] resume];
 }

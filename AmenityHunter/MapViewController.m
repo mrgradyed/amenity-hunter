@@ -21,6 +21,7 @@
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
+@property(nonatomic) MKMapRect visibleMapArea;
 
 @end
 
@@ -101,6 +102,8 @@
     return _mapAmenityAnnotations;
 }
 
+- (MKMapRect)visibleMapArea { return _visibleMapArea = self.mapView.visibleMapRect; }
+
 - (void)setMapView:(MKMapView *)mapView
 {
     // Configure the map view upon setting it.
@@ -109,6 +112,7 @@
 
     [self askForLocationPermission];
 
+    _mapView.showsPointsOfInterest = NO;
     _mapView.showsUserLocation = YES;
     _mapView.userTrackingMode = MKUserTrackingModeFollow;
 }
@@ -136,8 +140,10 @@
 
 #pragma mark - MKMapViewDelegate
 
-- (void)mapViewDidFinishRenderingMap:(MKMapView *)mapView fullyRendered:(BOOL)fullyRendered
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
+    [self removeOutOfMapAnnotations];
+
     OverpassAPI *overpassAPIsharedInstance = [OverpassAPI sharedInstance];
 
     OverpassBBox *currentBBox = [self overpassBBoxFromVisibleMapArea];
@@ -145,10 +151,11 @@
     overpassAPIsharedInstance.boundingBox = currentBBox;
 
 #warning This is just an example. The amenity type should be chosen by the user via the UI.
-    overpassAPIsharedInstance.amenityType = @"cinema";
+    overpassAPIsharedInstance.amenityType = @"bar";
 
     [overpassAPIsharedInstance startFetchingAmenitiesData];
 }
+
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
@@ -159,6 +166,10 @@
     {
         annotationView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation
                                                          reuseIdentifier:@"AmenityAnnotationID"];
+
+        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
+
+
     }
 
     return annotationView;
@@ -244,10 +255,8 @@
 - (void)handleOverpassData:(NSNotification *)notification
 {
 #if DEBUG
-    NSLog(@"%@", notification.userInfo);
+//  NSLog(@"%@", notification.userInfo);
 #endif
-
-    [self.mapView removeAnnotations:self.mapAmenityAnnotations];
 
     self.mapAmenityAnnotations = nil;
 
@@ -277,7 +286,27 @@
         [self.mapAmenityAnnotations addObject:annotation];
     }
 
-    [self.mapView showAnnotations:self.mapAmenityAnnotations animated:YES];
+    [self.mapView addAnnotations:self.mapAmenityAnnotations];
+}
+
+- (void)removeOutOfMapAnnotations
+{
+    NSSet *visibleAnnotations = [self.mapView annotationsInMapRect:self.visibleMapArea];
+
+    NSLog(@"VISIBLE: %d", [visibleAnnotations count]);
+
+    NSMutableArray *allAnnotations = [self.mapView.annotations copy];
+
+    NSLog(@"ALL %d", [self.mapView.annotations count]);
+
+
+    for (id<MKAnnotation> annotation in allAnnotations)
+    {
+        if (![visibleAnnotations containsObject:annotation])
+        {
+            [self.mapView removeAnnotation:annotation];
+        }
+    }
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
