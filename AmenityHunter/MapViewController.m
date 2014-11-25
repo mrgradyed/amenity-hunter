@@ -21,6 +21,7 @@
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
+@property(strong, nonatomic) OverpassAPI *overpassAPIsharedInstance;
 @property(nonatomic) MKMapRect visibleMapArea;
 
 @end
@@ -102,6 +103,11 @@
     return _mapAmenityAnnotations;
 }
 
+- (OverpassAPI *)overpassAPIsharedInstance
+{
+    return _overpassAPIsharedInstance = [OverpassAPI sharedInstance];
+}
+
 - (MKMapRect)visibleMapArea { return _visibleMapArea = self.mapView.visibleMapRect; }
 
 - (void)setMapView:(MKMapView *)mapView
@@ -144,18 +150,13 @@
 {
     [self removeOutOfMapAnnotations];
 
-    OverpassAPI *overpassAPIsharedInstance = [OverpassAPI sharedInstance];
-
-    OverpassBBox *currentBBox = [self overpassBBoxFromVisibleMapArea];
-
-    overpassAPIsharedInstance.boundingBox = currentBBox;
+    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
 
 #warning This is just an example. The amenity type should be chosen by the user via the UI.
-    overpassAPIsharedInstance.amenityType = @"bar";
+    self.overpassAPIsharedInstance.amenityType = @"bar";
 
-    [overpassAPIsharedInstance startFetchingAmenitiesData];
+    [self.overpassAPIsharedInstance startFetchingAmenitiesData];
 }
-
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
@@ -168,8 +169,6 @@
                                                          reuseIdentifier:@"AmenityAnnotationID"];
 
         ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
-
-
     }
 
     return annotationView;
@@ -299,7 +298,6 @@
 
     NSLog(@"ALL %d", [self.mapView.annotations count]);
 
-
     for (id<MKAnnotation> annotation in allAnnotations)
     {
         if (![visibleAnnotations containsObject:annotation])
@@ -311,11 +309,11 @@
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
 {
-    MKMapPoint bottomLeftCorner =
-        MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea), MKMapRectGetMaxY(self.visibleMapArea));
+    MKMapPoint bottomLeftCorner = MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea),
+                                                 MKMapRectGetMaxY(self.visibleMapArea));
 
-    MKMapPoint topRightCorner =
-        MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea), MKMapRectGetMinY(self.visibleMapArea));
+    MKMapPoint topRightCorner = MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea),
+                                               MKMapRectGetMinY(self.visibleMapArea));
 
     CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
 
@@ -326,8 +324,6 @@
                                         highestLatitude:topRightCornerCoordinates.latitude
                                        highestLongitude:topRightCornerCoordinates.longitude];
 }
-
-- (void)requestAmenitiesDataFetch { [[OverpassAPI sharedInstance] startFetchingAmenitiesData]; }
 
 /*
 #pragma mark - Navigation
