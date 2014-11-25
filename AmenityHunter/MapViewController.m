@@ -148,7 +148,11 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    [self removeOutOfMapAnnotations];
+    [self removeOffMapAnnotations];
+
+    //  NSArray *currentAnnotations = [self.mapView.annotations copy];
+
+    //    [self.mapView removeAnnotations:currentAnnotations];
 
     self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
 
@@ -165,8 +169,9 @@
 
     if (!annotationView)
     {
-        annotationView = [[MKPinAnnotationView alloc] initWithAnnotation:annotation
-                                                         reuseIdentifier:@"AmenityAnnotationID"];
+        annotationView =
+            [[MKPinAnnotationView alloc] initWithAnnotation:annotation
+                                            reuseIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
         ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
     }
@@ -288,15 +293,13 @@
     [self.mapView addAnnotations:self.mapAmenityAnnotations];
 }
 
-- (void)removeOutOfMapAnnotations
+- (void)removeOffMapAnnotations
 {
     NSSet *visibleAnnotations = [self.mapView annotationsInMapRect:self.visibleMapArea];
 
     NSLog(@"VISIBLE: %d", [visibleAnnotations count]);
 
     NSMutableArray *allAnnotations = [self.mapView.annotations copy];
-
-    NSLog(@"ALL %d", [self.mapView.annotations count]);
 
     for (id<MKAnnotation> annotation in allAnnotations)
     {
@@ -305,6 +308,8 @@
             [self.mapView removeAnnotation:annotation];
         }
     }
+
+    NSLog(@"ALL %d", [self.mapView.annotations count]);
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea

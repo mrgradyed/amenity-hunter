@@ -12,7 +12,12 @@ NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotifica
 
 static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
 static NSString *const overpassFormat = @"json";
-static int const overpassTimeout = 25;
+
+// This parameter indicates the maximum allowed runtime for the query in seconds, as expected by the
+// user. If the query runs longer than this time, the server may abort the query with a timeout. The
+// second effect is, the higher this value, the more probably the server rejects the query before
+// executing it.
+static int const overpassServerTimeout = 5;
 
 @interface OverpassAPI ()
 
@@ -80,6 +85,11 @@ static int const overpassTimeout = 25;
 
     if (self)
     {
+        NSURLSessionConfiguration *sessionConfiguration =
+            [NSURLSessionConfiguration ephemeralSessionConfiguration];
+
+        sessionConfiguration.timeoutIntervalForResource = overpassServerTimeout + 2;
+
         _ephemeralSession = [NSURLSession
             sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
     }
@@ -93,7 +103,7 @@ static int const overpassTimeout = 25;
 {
     NSString *requestString =
         [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",
-                                   overpassEndpoint, overpassFormat, overpassTimeout,
+                                   overpassEndpoint, overpassFormat, overpassServerTimeout,
                                    self.amenityType, [self.boundingBox overpassString]];
 
 #if DEBUG
