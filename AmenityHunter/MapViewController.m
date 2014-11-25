@@ -311,13 +311,11 @@
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
 {
-    MKMapRect visibleMapArea = self.mapView.visibleMapRect;
-
     MKMapPoint bottomLeftCorner =
-        MKMapPointMake(MKMapRectGetMinX(visibleMapArea), MKMapRectGetMaxY(visibleMapArea));
+        MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea), MKMapRectGetMaxY(self.visibleMapArea));
 
     MKMapPoint topRightCorner =
-        MKMapPointMake(MKMapRectGetMaxX(visibleMapArea), MKMapRectGetMinY(visibleMapArea));
+        MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea), MKMapRectGetMinY(self.visibleMapArea));
 
     CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
 
