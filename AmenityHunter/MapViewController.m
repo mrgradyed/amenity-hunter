@@ -324,10 +324,16 @@
 
     CLLocationCoordinate2D topRightCornerCoordinates = MKCoordinateForMapPoint(topRightCorner);
 
-    return [[OverpassBBox alloc] initWithLowestLatitude:bottomLeftCornerCoordinates.latitude
-                                        lowestLongitude:bottomLeftCornerCoordinates.longitude
-                                        highestLatitude:topRightCornerCoordinates.latitude
-                                       highestLongitude:topRightCornerCoordinates.longitude];
+    // Rounding to tolerate very small map pannings.
+    double lowestLatitude = floor(bottomLeftCornerCoordinates.latitude * 1000) / 1000;
+    double lowestLongitude = floor(bottomLeftCornerCoordinates.longitude * 1000) / 1000;
+    double highestLatitude = ceil(topRightCornerCoordinates.latitude * 1000) / 1000;
+    double highestLongitude = ceil(topRightCornerCoordinates.longitude * 1000) / 1000;
+
+    return [[OverpassBBox alloc] initWithLowestLatitude:lowestLatitude
+                                        lowestLongitude:lowestLongitude
+                                        highestLatitude:highestLatitude
+                                       highestLongitude:highestLongitude];
 }
 
 /*
