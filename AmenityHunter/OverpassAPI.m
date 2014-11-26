@@ -124,17 +124,34 @@ static int const overpassServerTimeout = 5;
     // Check if request has been performed recently.
     if (recentlyFetchedData)
     {
+        // Request has been already performed recently.
+        // So use the recently fetched data without requesting again.
+        self.lastFetchedData = recentlyFetchedData;
 
 #if DEBUG
         NSLog(@"Using previously fetched data!!");
 #endif
 
-        // Request has been already performed recently.
-        // So use the recently fetched data without requesting again.
-        self.lastFetchedData = recentlyFetchedData;
-
         return;
     }
+
+    [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
+                                                           NSArray *downloadTasks) {
+
+        for (NSURLSessionDownloadTask *dt in downloadTasks)
+        {
+            if (dt.state != NSURLSessionTaskStateCompleted &&
+                dt.state != NSURLSessionTaskStateCanceling)
+            {
+                [dt cancel];
+                
+                #if DEBUG
+                NSLog(@"CANCELING %@!!", dt.originalRequest.URL);
+                #endif
+            }
+        }
+
+    }];
 
     NSURL *requestURL =
         [NSURL URLWithString:[requestString
@@ -155,12 +172,12 @@ static int const overpassServerTimeout = 5;
 
                       if ([self.recentRequestsAndData count] > 20)
                       {
-                          #if DEBUG
-                          NSLog(@"Cache reset.");
-                          #endif
-
                           // If the recent requests dictionary has grown too much, reset it.
                           self.recentRequestsAndData = nil;
+
+                          #if DEBUG
+                          NSLog(@"CACHE RESET.");
+                          #endif
                       }
 
                       // Adding response data to recent requests dictionary.
@@ -169,8 +186,7 @@ static int const overpassServerTimeout = 5;
                   else
                   {
                       #if DEBUG
-                      NSLog(@"ERROR while fetching with request %@", requestString);
-                      NSLog(@"%@", error.userInfo);
+                      NSLog(@"FAILED OR CANCELED REQUEST: %@", requestString);
                       #endif
                   }
               }] resume];
