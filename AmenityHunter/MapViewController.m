@@ -208,16 +208,16 @@
     switch (status)
     {
     case kCLAuthorizationStatusAuthorizedAlways:
-        NSLog(@"kCLAuthorizationStatusAuthorizedAlways");
+        NSLog(@"kCLAuthorizationStatusAuthorizedAlways\n\n");
         break;
     case kCLAuthorizationStatusAuthorizedWhenInUse:
-        NSLog(@"kCLAuthorizationStatusAuthorizedWhenInUse");
+        NSLog(@"kCLAuthorizationStatusAuthorizedWhenInUse\n\n");
         break;
     case kCLAuthorizationStatusDenied:
-        NSLog(@"kCLAuthorizationStatusDenied");
+        NSLog(@"kCLAuthorizationStatusDenied\n\n");
         break;
     case kCLAuthorizationStatusRestricted:
-        NSLog(@"kCLAuthorizationStatusRestricted");
+        NSLog(@"kCLAuthorizationStatusRestricted\n\n");
         break;
     default:
         break;
@@ -258,10 +258,6 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-#if DEBUG
-//  NSLog(@"%@", notification.userInfo);
-#endif
-
     self.mapAmenityAnnotations = nil;
 
     id elements = [notification.userInfo valueForKey:@"elements"];
@@ -297,8 +293,6 @@
 {
     NSSet *visibleAnnotations = [self.mapView annotationsInMapRect:self.visibleMapArea];
 
-    NSLog(@"VISIBLE: %d", [visibleAnnotations count]);
-
     NSMutableArray *allAnnotations = [self.mapView.annotations copy];
 
     for (id<MKAnnotation> annotation in allAnnotations)
@@ -309,7 +303,13 @@
         }
     }
 
-    NSLog(@"ALL %d", [self.mapView.annotations count]);
+#if DEBUG
+    NSLog(@"VISIBLE ANNOTATIONS: %d\n\n", [visibleAnnotations count]);
+#endif
+
+#if DEBUG
+    NSLog(@"ALL ANNOTATIONS: %d\n\n", [visibleAnnotations count]);
+#endif
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
@@ -321,7 +321,6 @@
                                                MKMapRectGetMinY(self.visibleMapArea));
 
     CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
-
     CLLocationCoordinate2D topRightCornerCoordinates = MKCoordinateForMapPoint(topRightCorner);
 
     // Rounding to tolerate very small map pannings.

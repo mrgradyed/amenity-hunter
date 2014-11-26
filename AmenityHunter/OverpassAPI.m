@@ -23,6 +23,10 @@ static int const overpassServerTimeout = 5;
 
 @property(nonatomic, strong) NSURLSession *ephemeralSession;
 @property(nonatomic, strong) NSDictionary *lastFetchedData;
+
+// This dictionary is used as a small in-memory cache for a (very) limited number of recently
+// fetched data. This should avoid requesting same data multiple times when the map does small
+// region changes.
 @property(nonatomic, strong) NSMutableDictionary *recentRequestsAndData;
 
 @end
@@ -44,6 +48,7 @@ static int const overpassServerTimeout = 5;
 {
     _lastFetchedData = lastFetchedData;
 
+    // Send a notification upon setting the latest retrieved data dictionary.
     [[NSNotificationCenter defaultCenter]
         postNotification:[NSNotification notificationWithName:gOverpassDataFetchedNotification
                                                        object:self
@@ -97,6 +102,7 @@ static int const overpassServerTimeout = 5;
         NSURLSessionConfiguration *sessionConfiguration =
             [NSURLSessionConfiguration ephemeralSessionConfiguration];
 
+        // Client timeout will be a little bit more than the server's one.
         sessionConfiguration.timeoutIntervalForResource = overpassServerTimeout + 2;
 
         _ephemeralSession = [NSURLSession
@@ -110,18 +116,19 @@ static int const overpassServerTimeout = 5;
 
 - (void)startFetchingAmenitiesData
 {
+    // The request for fetching data via the Overpass API.
     NSString *requestString =
         [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",
                                    overpassEndpoint, overpassFormat, overpassServerTimeout,
                                    self.amenityType, [self.boundingBox overpassString]];
 
 #if DEBUG
-    NSLog(@"REQUEST:%@", requestString);
+    NSLog(@"REQUEST URL:%@\n\n", requestString);
 #endif
 
+    // Check if request has been performed recently.
     NSDictionary *recentlyFetchedData = self.recentRequestsAndData[requestString];
 
-    // Check if request has been performed recently.
     if (recentlyFetchedData)
     {
         // Request has been already performed recently.
@@ -129,64 +136,81 @@ static int const overpassServerTimeout = 5;
         self.lastFetchedData = recentlyFetchedData;
 
 #if DEBUG
-        NSLog(@"Using previously fetched data!!");
+        NSLog(@"USING PREVIOUSLY FETCHED DATA.\n\n");
 #endif
 
         return;
     }
 
+    // Get the currently running (not completed) tasks and cancel them. The map has changed region
+    // and we are interested in getting the data just for the new current region. The not completed
+    // tasks for retrieving old regions' data can be cancelled.
     [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
                                                            NSArray *downloadTasks) {
 
         for (NSURLSessionDownloadTask *dt in downloadTasks)
         {
+            // Check if the old task is running (or is suspended).
             if (dt.state != NSURLSessionTaskStateCompleted &&
                 dt.state != NSURLSessionTaskStateCanceling)
             {
+                // Cancel the old task.
                 [dt cancel];
                 
                 #if DEBUG
-                NSLog(@"CANCELING %@!!", dt.originalRequest.URL);
+                NSLog(@"CANCELING %@!\n\n", dt.originalRequest.URL);
                 #endif
             }
         }
 
     }];
 
+    // The request URL for the new task.
     NSURL *requestURL =
         [NSURL URLWithString:[requestString
                                  stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 
     NSURLRequest *request = [NSURLRequest requestWithURL:requestURL];
 
+    // A new task
     [[self.ephemeralSession
         downloadTaskWithRequest:request
               completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
 
                   if (!error)
                   {
+                      // Task completed!
+
+                      // Put the retrieved JSON data in a dictionary.
                       self.lastFetchedData = [NSJSONSerialization
                           JSONObjectWithData:[NSData dataWithContentsOfURL:location]
                                      options:0
                                        error:nil];
 
+                      // We want the recent requests and data cache small.
                       if ([self.recentRequestsAndData count] > 20)
                       {
                           // If the recent requests dictionary has grown too much, reset it.
                           self.recentRequestsAndData = nil;
 
                           #if DEBUG
-                          NSLog(@"CACHE RESET.");
+                          NSLog(@"CACHE RESET.\n\n");
                           #endif
                       }
 
                       // Adding response data to recent requests dictionary.
                       self.recentRequestsAndData[requestString] = self.lastFetchedData;
+
+                      #if DEBUG
+                      NSLog(@"NEW DATA HAS BEEN FETCHED!\n\n");
+                      #endif
                   }
                   else
                   {
+                      // Task failed.
+
                       #if DEBUG
-                      NSLog(@"FAILED OR CANCELED REQUEST: %@", requestString);
+                      NSLog(@"FAILED OR CANCELED REQUEST: %@\n\n", requestString);
                       #endif
                   }
               }] resume];
