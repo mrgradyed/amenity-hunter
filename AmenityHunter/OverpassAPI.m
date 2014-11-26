@@ -23,7 +23,7 @@ static int const overpassServerTimeout = 5;
 
 @property(nonatomic, strong) NSURLSession *ephemeralSession;
 @property(nonatomic, strong) NSDictionary *lastFetchedData;
-@property(nonatomic, strong) NSString *lastRequest;
+@property(nonatomic, strong) NSMutableDictionary *recentRequestsAndData;
 
 @end
 
@@ -31,7 +31,16 @@ static int const overpassServerTimeout = 5;
 
 #pragma mark - ACCESSORS
 
-- (void)setLastFetchedData:(NSDictionary *)lastFetchedData
+- (NSDictionary *)recentRequestsAndData
+{
+    if (!_recentRequestsAndData)
+    {
+        _recentRequestsAndData = [[NSMutableDictionary alloc] init];
+    }
+    return _recentRequestsAndData;
+}
+
+- (void)setLastFetchedData:(NSMutableDictionary *)lastFetchedData
 {
     _lastFetchedData = lastFetchedData;
 
@@ -107,8 +116,25 @@ static int const overpassServerTimeout = 5;
                                    self.amenityType, [self.boundingBox overpassString]];
 
 #if DEBUG
-    NSLog(@"START FETCHING REQUEST:%@", requestString);
+    NSLog(@"REQUEST:%@", requestString);
 #endif
+
+    NSDictionary *recentlyFetchedData = self.recentRequestsAndData[requestString];
+
+    // Check if request has been performed recently.
+    if (recentlyFetchedData)
+    {
+
+#if DEBUG
+        NSLog(@"Using previously fetched data!!");
+#endif
+
+        // Request has been already performed recently.
+        // So use the recently fetched data without requesting again.
+        self.lastFetchedData = recentlyFetchedData;
+
+        return;
+    }
 
     NSURL *requestURL =
         [NSURL URLWithString:[requestString
@@ -126,6 +152,19 @@ static int const overpassServerTimeout = 5;
                           JSONObjectWithData:[NSData dataWithContentsOfURL:location]
                                      options:0
                                        error:nil];
+
+                      if ([self.recentRequestsAndData count] > 20)
+                      {
+                          #if DEBUG
+                          NSLog(@"Cache reset.");
+                          #endif
+
+                          // If the recent requests dictionary has grown too much, reset it.
+                          self.recentRequestsAndData = nil;
+                      }
+
+                      // Adding response data to recent requests dictionary.
+                      self.recentRequestsAndData[requestString] = self.lastFetchedData;
                   }
                   else
                   {
