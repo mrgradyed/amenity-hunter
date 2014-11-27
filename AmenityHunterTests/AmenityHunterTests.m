@@ -52,7 +52,7 @@
                                                      highestLongitude:7.18];
 
     // Test if the bbox is properly converted to a string for use in OverpassQL queries.
-    XCTAssertEqualObjects([bbox overpassString], @"(50.745, 7.17, 50.75, 7.18)");
+    XCTAssertEqualObjects([bbox overpassString], @"(50.745000,7.170000,50.750000,7.180000)");
 }
 
 - (void)testOverpassBBoxInit
