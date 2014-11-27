@@ -106,7 +106,7 @@ static int const overpassServerTimeout = 5;
         sessionConfiguration.timeoutIntervalForResource = overpassServerTimeout + 2;
 
         _ephemeralSession = [NSURLSession
-            sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration]];
+            sessionWithConfiguration:sessionConfiguration];
     }
 
     return self;
