@@ -152,8 +152,6 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    [self removeOffMapAnnotations];
-
     self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
 
     self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
@@ -284,6 +282,15 @@
 
         [self.mapAmenityAnnotations addObject:annotation];
     }
+
+    [self refreshMapAnnotations];
+}
+
+- (void)refreshMapAnnotations
+{
+    NSArray *currentAnnotations = [self.mapView.annotations copy];
+
+    [self.mapView removeAnnotations:currentAnnotations];
 
     [self.mapView addAnnotations:self.mapAmenityAnnotations];
 }
