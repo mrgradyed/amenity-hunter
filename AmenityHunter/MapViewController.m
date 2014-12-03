@@ -290,9 +290,16 @@
 {
     NSArray *currentAnnotations = [self.mapView.annotations copy];
 
-    [self.mapView removeAnnotations:currentAnnotations];
+    // This code causes UI operations to be executed, so it must be run on the main queue to avoid
+    // conflicts accessing the annotations, and thus the error: "Collection was mutated while being
+    // enumerated".
+    dispatch_async(dispatch_get_main_queue(), ^{
 
-    [self.mapView addAnnotations:self.mapAmenityAnnotations];
+        [self.mapView removeAnnotations:currentAnnotations];
+
+        [self.mapView addAnnotations:self.mapAmenityAnnotations];
+
+    });
 }
 
 - (void)removeOffMapAnnotations
