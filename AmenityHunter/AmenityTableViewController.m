@@ -10,9 +10,43 @@
 
 @interface AmenityTableViewController ()
 
+@property(nonatomic, strong) NSArray *amenitiesCategories;
+@property(nonatomic, strong) NSArray *amenitiesTypes;
+
 @end
 
 @implementation AmenityTableViewController
+
+- (NSArray *)amenitiesCategories
+{
+    if (!_amenitiesCategories)
+    {
+        _amenitiesCategories = @[ @"Sustenance" ];
+    }
+    return _amenitiesCategories;
+}
+
+- (NSArray *)amenitiesTypes
+{
+    if (!_amenitiesTypes)
+    {
+        _amenitiesTypes = @[
+            @[
+               @"bar",
+               @"biergarten",
+               @"cafe",
+               @"drinking_water",
+               @"fast_food",
+               @"food_court",
+               @"ice_cream",
+               @"pub",
+               @"restaurant"
+            ]
+        ];
+    }
+
+    return _amenitiesTypes;
+}
 
 - (void)viewDidLoad
 {
@@ -36,20 +70,20 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    // Return the number of sections.
+// Return the number of sections.
 
 #warning INCOMPLETE IMPLEMENTATION.
 
-    return 1;
+    return [self.amenitiesCategories count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    // Return the number of rows in the section.
+// Return the number of rows in the section.
 
 #warning INCOMPLETE IMPLEMENTATION.
 
-    return 10;
+    return [self.amenitiesTypes[section] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
@@ -59,10 +93,16 @@
         [tableView dequeueReusableCellWithIdentifier:@"AmenityTableCell" forIndexPath:indexPath];
 
     // Configure the cell...
+    cell.textLabel.text = self.amenitiesTypes[indexPath.section][indexPath.row];
 
 #warning INCOMPLETE IMPLEMENTATION.
 
     return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return self.amenitiesCategories[section];
 }
 
 @end
