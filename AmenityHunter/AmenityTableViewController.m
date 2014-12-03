@@ -7,6 +7,7 @@
 //
 
 #import "AmenityTableViewController.h"
+#import "MapViewController.h"
 
 @interface AmenityTableViewController ()
 
@@ -103,6 +104,17 @@
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     return self.amenitiesCategories[section];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    id detailViewController = [self.splitViewController.viewControllers lastObject];
+
+    if ([detailViewController isKindOfClass:[MapViewController class]])
+    {
+        ((MapViewController *)detailViewController).selectedAmenityType =
+            self.amenitiesTypes[indexPath.section][indexPath.row];
+    }
 }
 
 @end

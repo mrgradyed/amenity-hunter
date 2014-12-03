@@ -123,6 +123,16 @@
     _mapView.userTrackingMode = MKUserTrackingModeFollow;
 }
 
+- (void)setSelectedAmenityType:(NSString *)selectedAmenityType
+{
+    if ([_selectedAmenityType isEqualToString:selectedAmenityType])
+    {
+        return;
+    }
+
+    _selectedAmenityType = selectedAmenityType;
+}
+
 #pragma mark - LIFECYCLE
 
 - (void)viewDidLoad
@@ -138,26 +148,15 @@
 
 - (void)dealloc { [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:nil]; }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 #pragma mark - MKMapViewDelegate
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
     [self removeOffMapAnnotations];
 
-    //  NSArray *currentAnnotations = [self.mapView.annotations copy];
-
-    //    [self.mapView removeAnnotations:currentAnnotations];
-
     self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
 
-#warning This is just an example. The amenity type should be chosen by the user via the UI.
-    self.overpassAPIsharedInstance.amenityType = @"bar";
+    self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
 
     [self.overpassAPIsharedInstance startFetchingAmenitiesData];
 }
