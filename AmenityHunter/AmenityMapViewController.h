@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MapViewController : UIViewController
+@interface AmenityMapViewController : UIViewController
 
 @property(strong, nonatomic) NSString *selectedAmenityType;
 

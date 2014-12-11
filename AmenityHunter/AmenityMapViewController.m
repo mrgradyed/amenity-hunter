@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Emiliano D'Alterio. All rights reserved.
 //
 
-#import "MapViewController.h"
+#import "AmenityMapViewController.h"
 #import "OverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
@@ -14,7 +14,8 @@
 @import MapKit;
 @import CoreLocation;
 
-@interface MapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
+@interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate,
+                                        UIAlertViewDelegate>
 
 @property(weak, nonatomic) IBOutlet MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
@@ -26,7 +27,7 @@
 
 @end
 
-@implementation MapViewController
+@implementation AmenityMapViewController
 
 #pragma mark - ACCESSORS
 
@@ -290,8 +291,10 @@
 {
     NSArray *currentAnnotations = [self.mapView.annotations copy];
 
-    // This code causes UI operations to be executed, so it must be run on the main queue to avoid
-    // conflicts accessing the annotations, and thus the error: "Collection was mutated while being
+    // This code causes UI operations to be executed, so it must be run on the
+    // main queue to avoid
+    // conflicts accessing the annotations, and thus the error: "Collection was
+    // mutated while being
     // enumerated".
     dispatch_async(dispatch_get_main_queue(), ^{
 

@@ -7,7 +7,7 @@
 //
 
 #import "AmenityTableViewController.h"
-#import "MapViewController.h"
+#import "AmenityMapViewController.h"
 
 @interface AmenityTableViewController ()
 
@@ -58,7 +58,8 @@
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view
+    // Uncomment the following line to display an Edit button in the navigation
+    // bar for this view
     // controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
@@ -135,9 +136,9 @@
 {
     id detailViewController = [self.splitViewController.viewControllers lastObject];
 
-    if ([detailViewController isKindOfClass:[MapViewController class]])
+    if ([detailViewController isKindOfClass:[AmenityMapViewController class]])
     {
-        ((MapViewController *)detailViewController).selectedAmenityType = selectedAmenity;
+        ((AmenityMapViewController *)detailViewController).selectedAmenityType = selectedAmenity;
     }
 }
 
