@@ -6,32 +6,37 @@
 //  Copyright (c) 2014 Emiliano D'Alterio. All rights reserved.
 //
 
-#import "OverpassAPI.h"
+#import "SharedOverpassAPI.h"
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 
 static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
 static NSString *const overpassFormat = @"json";
 
-// This parameter indicates the maximum allowed runtime for the query in seconds, as expected by the
-// user. If the query runs longer than this time, the server may abort the query with a timeout. The
-// second effect is, the higher this value, the more probably the server rejects the query before
+// This parameter indicates the maximum allowed runtime for the query in
+// seconds, as expected by the
+// user. If the query runs longer than this time, the server may abort the query
+// with a timeout. The
+// second effect is, the higher this value, the more probably the server rejects
+// the query before
 // executing it.
 static int const overpassServerTimeout = 5;
 
-@interface OverpassAPI ()
+@interface SharedOverpassAPI ()
 
 @property(nonatomic, strong) NSURLSession *ephemeralSession;
 @property(nonatomic, strong) NSDictionary *lastFetchedData;
 
-// This dictionary is used as a small in-memory cache for a (very) limited number of recently
-// fetched data. This should avoid requesting same data multiple times when the map does small
+// This dictionary is used as a small in-memory cache for a (very) limited
+// number of recently
+// fetched data. This should avoid requesting same data multiple times when the
+// map does small
 // region changes.
 @property(nonatomic, strong) NSMutableDictionary *recentRequestsAndData;
 
 @end
 
-@implementation OverpassAPI
+@implementation SharedOverpassAPI
 
 #pragma mark - ACCESSORS
 
@@ -64,7 +69,7 @@ static int const overpassServerTimeout = 5;
     // The static variable which will hold the single and only instance of this
     // class.
 
-    static OverpassAPI *sharedOverpassAPI;
+    static SharedOverpassAPI *sharedOverpassAPI;
 
     static dispatch_once_t blockHasCompleted;
 
@@ -105,8 +110,7 @@ static int const overpassServerTimeout = 5;
         // Client timeout will be a little bit more than the server's one.
         sessionConfiguration.timeoutIntervalForResource = overpassServerTimeout + 2;
 
-        _ephemeralSession = [NSURLSession
-            sessionWithConfiguration:sessionConfiguration];
+        _ephemeralSession = [NSURLSession sessionWithConfiguration:sessionConfiguration];
     }
 
     return self;
@@ -142,8 +146,10 @@ static int const overpassServerTimeout = 5;
         return;
     }
 
-    // Get the currently running (not completed) tasks and cancel them. The map has changed region
-    // and we are interested in getting the data just for the new current region. The not completed
+    // Get the currently running (not completed) tasks and cancel them. The map
+    // has changed region
+    // and we are interested in getting the data just for the new current region.
+    // The not completed
     // tasks for retrieving old regions' data can be cancelled.
     [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
                                                            NSArray *downloadTasks) {
@@ -190,7 +196,8 @@ static int const overpassServerTimeout = 5;
                       // We want the recent requests and data cache small.
                       if ([self.recentRequestsAndData count] > 20)
                       {
-                          // If the recent requests dictionary has grown too much, reset it.
+                          // If the recent requests dictionary has grown too much,
+                          // reset it.
                           self.recentRequestsAndData = nil;
 
                           #if DEBUG

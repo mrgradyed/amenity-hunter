@@ -7,7 +7,7 @@
 //
 
 #import "AmenityMapViewController.h"
-#import "OverpassAPI.h"
+#import "SharedOverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
 
@@ -22,7 +22,7 @@
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
-@property(strong, nonatomic) OverpassAPI *overpassAPIsharedInstance;
+@property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
 @property(nonatomic) MKMapRect visibleMapArea;
 
 @end
@@ -104,9 +104,9 @@
     return _mapAmenityAnnotations;
 }
 
-- (OverpassAPI *)overpassAPIsharedInstance
+- (SharedOverpassAPI *)overpassAPIsharedInstance
 {
-    return _overpassAPIsharedInstance = [OverpassAPI sharedInstance];
+    return _overpassAPIsharedInstance = [SharedOverpassAPI sharedInstance];
 }
 
 - (MKMapRect)visibleMapArea { return _visibleMapArea = self.mapView.visibleMapRect; }

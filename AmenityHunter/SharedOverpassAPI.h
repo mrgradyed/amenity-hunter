@@ -11,7 +11,7 @@
 
 extern NSString *const gOverpassDataFetchedNotification;
 
-@interface OverpassAPI : NSObject
+@interface SharedOverpassAPI : NSObject
 
 @property(nonatomic, strong) NSString *amenityType;
 @property(nonatomic, strong) OverpassBBox *boundingBox;

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
-#import "OverpassAPI.h"
+#import "SharedOverpassAPI.h"
 
 @interface OverpassAPITests : XCTestCase
 
@@ -20,13 +20,15 @@
 - (void)setUp
 {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the
+    // Put setup code here. This method is called before the invocation of each
+    // test method in the
     // class.
 }
 
 - (void)tearDown
 {
-    // Put teardown code here. This method is called after the invocation of each test method in the
+    // Put teardown code here. This method is called after the invocation of each
+    // test method in the
     // class.
     [super tearDown];
 }
@@ -34,12 +36,11 @@
 - (void)testSingleton
 {
     // Singleton class should return an exception when receiving init message.
-    XCTAssertThrows([[OverpassAPI alloc] init]);
+    XCTAssertThrows([[SharedOverpassAPI alloc] init]);
 
     // Singleton class must have only one instance.
     // Thus, shareInstance must return always the same object.
-    XCTAssertTrue([OverpassAPI sharedInstance] == [OverpassAPI sharedInstance]);
+    XCTAssertTrue([SharedOverpassAPI sharedInstance] == [SharedOverpassAPI sharedInstance]);
 }
-
 
 @end
