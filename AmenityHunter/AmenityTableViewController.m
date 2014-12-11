@@ -53,12 +53,28 @@
 {
     [super viewDidLoad];
 
+    self.navigationController.navigationBarHidden = YES;
+
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
 
     // Uncomment the following line to display an Edit button in the navigation bar for this view
     // controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    NSIndexPath *firstSectionFirstRow = [NSIndexPath indexPathForRow:2 inSection:0];
+
+    [self.tableView selectRowAtIndexPath:firstSectionFirstRow
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionTop];
+
+    NSString *selectedAmenity =
+        self.amenitiesTypes[firstSectionFirstRow.section][firstSectionFirstRow.row];
+
+    [self setAmenityInMapController:selectedAmenity];
 }
 
 - (void)didReceiveMemoryWarning
@@ -108,12 +124,20 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSString *selectedAmenity = self.amenitiesTypes[indexPath.section][indexPath.row];
+
+    [self setAmenityInMapController:selectedAmenity];
+}
+
+#pragma mark - UTILITY METHODS
+
+- (void)setAmenityInMapController:(NSString *)selectedAmenity
+{
     id detailViewController = [self.splitViewController.viewControllers lastObject];
 
     if ([detailViewController isKindOfClass:[MapViewController class]])
     {
-        ((MapViewController *)detailViewController).selectedAmenityType =
-            self.amenitiesTypes[indexPath.section][indexPath.row];
+        ((MapViewController *)detailViewController).selectedAmenityType = selectedAmenity;
     }
 }
 
