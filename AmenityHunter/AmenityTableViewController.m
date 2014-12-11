@@ -18,6 +18,8 @@
 
 @implementation AmenityTableViewController
 
+#pragma mark - ACCESSORS
+
 - (NSArray *)amenitiesCategories
 {
     if (!_amenitiesCategories)
@@ -48,6 +50,8 @@
 
     return _amenitiesTypes;
 }
+
+#pragma mark - LIFECYCLE
 
 - (void)viewDidLoad
 {

@@ -124,6 +124,8 @@
     _mapView.userTrackingMode = MKUserTrackingModeFollow;
 }
 
+#pragma mark - ACCESSORS FOR PUBLIC PROPERTIES
+
 - (void)setSelectedAmenityType:(NSString *)selectedAmenityType
 {
     if ([_selectedAmenityType isEqualToString:selectedAmenityType])
@@ -132,6 +134,12 @@
     }
 
     _selectedAmenityType = selectedAmenityType;
+
+    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
+
+    self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
+
+    [self.overpassAPIsharedInstance startFetchingAmenitiesData];
 }
 
 #pragma mark - LIFECYCLE
