@@ -18,7 +18,11 @@
 {
     _networkActivitiesCount = networkActivitiesCount;
 
-    if (_networkActivitiesCount <= 0)
+    if (_networkActivitiesCount > 0)
+    {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    }
+    else
     {
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     }

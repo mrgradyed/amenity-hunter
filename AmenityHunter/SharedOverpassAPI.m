@@ -7,6 +7,7 @@
 //
 
 #import "SharedOverpassAPI.h"
+#import "NetworkIndicatorSharedController.h"
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 
@@ -89,7 +90,7 @@ static int const overpassServerTimeout = 5;
     // instead of creating a singleton by using the class method.
 
     @throw [NSException exceptionWithName:@"SingletonException"
-                                   reason:@"Please use: [OverpassAPI sharedInstance] instead."
+                                   reason:@"Please use: [SharedOverpassAPI sharedInstance] instead."
                                  userInfo:nil];
 
     return nil;
@@ -154,17 +155,17 @@ static int const overpassServerTimeout = 5;
     [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
                                                            NSArray *downloadTasks) {
 
-        for (NSURLSessionDownloadTask *dt in downloadTasks)
+        for (NSURLSessionDownloadTask *task in downloadTasks)
         {
             // Check if the old task is running (or is suspended).
-            if (dt.state != NSURLSessionTaskStateCompleted &&
-                dt.state != NSURLSessionTaskStateCanceling)
+            if (task.state != NSURLSessionTaskStateCompleted &&
+                task.state != NSURLSessionTaskStateCanceling)
             {
                 // Cancel the old task.
-                [dt cancel];
-                
+                [task cancel];
+
                 #if DEBUG
-                NSLog(@"CANCELING %@!\n\n", dt.originalRequest.URL);
+                NSLog(@"CANCELING %@!\n\n", task.originalRequest.URL);
                 #endif
             }
         }
@@ -179,9 +180,11 @@ static int const overpassServerTimeout = 5;
     NSURLRequest *request = [NSURLRequest requestWithURL:requestURL];
 
     // A new task
-    [[self.ephemeralSession
+    NSURLSessionDownloadTask *downloadTask = [self.ephemeralSession
         downloadTaskWithRequest:request
               completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+
+                  [[NetworkIndicatorSharedController sharedInstance] networkActivityStopped];
 
                   if (!error)
                   {
@@ -217,10 +220,14 @@ static int const overpassServerTimeout = 5;
                       // Task failed.
 
                       #if DEBUG
-                      NSLog(@"FAILED OR CANCELED REQUEST: %@\n\n", requestString);
+                      NSLog(@"FAILED OR CANCELLED REQUEST: %@\n\n", requestString);
                       #endif
                   }
-              }] resume];
+              }];
+
+    [downloadTask resume];
+
+    [[NetworkIndicatorSharedController sharedInstance] networkActivityStarted];
 }
 
 @end
