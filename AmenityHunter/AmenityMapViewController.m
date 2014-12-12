@@ -135,11 +135,7 @@
 
     _selectedAmenityType = selectedAmenityType;
 
-    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
-
-    self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
-
-    [self.overpassAPIsharedInstance startFetchingAmenitiesData];
+    [self fetchOverpassData];
 }
 
 #pragma mark - LIFECYCLE
@@ -161,11 +157,7 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
-
-    self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
-
-    [self.overpassAPIsharedInstance startFetchingAmenitiesData];
+    [self fetchOverpassData];
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
@@ -260,6 +252,15 @@
         // iOS 8.0 and later ONLY.
         [self.locationManager requestWhenInUseAuthorization];
     }
+}
+
+- (void)fetchOverpassData
+{
+    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
+
+    self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
+
+    [self.overpassAPIsharedInstance startFetchingAmenitiesData];
 }
 
 - (void)handleOverpassData:(NSNotification *)notification
