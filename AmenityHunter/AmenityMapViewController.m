@@ -162,6 +162,11 @@
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
+    if ([annotation isEqual:mapView.userLocation])
+    {
+        return nil;
+    }
+
     MKAnnotationView *annotationView =
         [mapView dequeueReusableAnnotationViewWithIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
