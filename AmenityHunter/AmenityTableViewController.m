@@ -24,8 +24,9 @@
 {
     if (!_amenitiesCategories)
     {
-        _amenitiesCategories = @[ @"Sustenance" ];
+        _amenitiesCategories = @[ @"Sustenance", @"Transportation", @"Financial" ];
     }
+
     return _amenitiesCategories;
 }
 
@@ -33,19 +34,24 @@
 {
     if (!_amenitiesTypes)
     {
-        _amenitiesTypes = @[
-            @[
-               @"bar",
-               @"biergarten",
-               @"cafe",
-               @"drinking_water",
-               @"fast_food",
-               @"food_court",
-               @"ice_cream",
-               @"pub",
-               @"restaurant"
-            ]
+        NSArray *sustenanceAmenities = @[
+            @"bar",
+            @"biergarten",
+            @"cafe",
+            @"drinking_water",
+            @"fast_food",
+            @"food_court",
+            @"ice_cream",
+            @"pub",
+            @"restaurant"
         ];
+
+        NSArray *transportationAmenities =
+            @[ @"bicycle_rental", @"bus_station", @"car_rental", @"fuel", @"parking", @"taxi" ];
+
+        NSArray *financialAmenities = @[ @"atm", @"bank" ];
+
+        _amenitiesTypes = @[ sustenanceAmenities, transportationAmenities, financialAmenities ];
     }
 
     return _amenitiesTypes;
