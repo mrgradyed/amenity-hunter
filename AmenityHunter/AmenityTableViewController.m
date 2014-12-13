@@ -68,20 +68,6 @@
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
-- (void)viewWillAppear:(BOOL)animated
-{
-    NSIndexPath *firstSectionFirstRow = [NSIndexPath indexPathForRow:2 inSection:0];
-
-    [self.tableView selectRowAtIndexPath:firstSectionFirstRow
-                                animated:NO
-                          scrollPosition:UITableViewScrollPositionTop];
-
-    NSString *selectedAmenity =
-        self.amenitiesTypes[firstSectionFirstRow.section][firstSectionFirstRow.row];
-
-    [self setAmenityInMapController:selectedAmenity];
-}
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];

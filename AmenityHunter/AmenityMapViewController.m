@@ -329,11 +329,11 @@
     }
 
 #if DEBUG
-    NSLog(@"VISIBLE ANNOTATIONS: %d\n\n", [visibleAnnotations count]);
+    NSLog(@"VISIBLE ANNOTATIONS: %lu\n\n", (unsigned long)[visibleAnnotations count]);
 #endif
 
 #if DEBUG
-    NSLog(@"ALL ANNOTATIONS: %d\n\n", [visibleAnnotations count]);
+    NSLog(@"ALL ANNOTATIONS: %lu\n\n", (unsigned long)[visibleAnnotations count]);
 #endif
 }
 

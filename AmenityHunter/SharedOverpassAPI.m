@@ -121,6 +121,11 @@ static int const overpassServerTimeout = 5;
 
 - (void)startFetchingAmenitiesData
 {
+    if (!self.amenityType || !self.boundingBox)
+    {
+        return;
+    }
+
     // The request for fetching data via the Overpass API.
     NSString *requestString =
         [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",
