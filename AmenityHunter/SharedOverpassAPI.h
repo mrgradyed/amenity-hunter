@@ -10,6 +10,7 @@
 #import "OverpassBBox.h"
 
 extern NSString *const gOverpassDataFetchedNotification;
+extern NSString *const gOverpassFetchingFailedNotification;
 
 @interface SharedOverpassAPI : NSObject
 

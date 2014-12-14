@@ -10,6 +10,7 @@
 #import "NetworkIndicatorSharedController.h"
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
+NSString *const gOverpassFetchingFailedNotification = @"OverpassFetchingFailedNotification";
 
 static NSString *const overpassEndpoint = @"http://overpass-api.de/api/interpreter?data=";
 static NSString *const overpassFormat = @"json";
@@ -222,11 +223,27 @@ static int const overpassServerTimeout = 5;
                   }
                   else
                   {
-                      // Task failed.
 
+                      if (error.code == -999)
+                      {
+                          // Task cancelled.
+                          #if DEBUG
+                          NSLog(@"REQUEST CANCELLED: %@\n\n", requestString);
+                          #endif
+                      }
+                      else
+                      {
+                          // Task failed. Let's notify this.
+                          [[NSNotificationCenter defaultCenter]
+                              postNotification:
+                                  [NSNotification
+                                      notificationWithName:gOverpassFetchingFailedNotification
+                                                    object:self
+                                                  userInfo:nil]];
                       #if DEBUG
-                      NSLog(@"FAILED OR CANCELLED REQUEST: %@\n\n", requestString);
+                          NSLog(@"REQUEST FAILED: %@\n\n", requestString);
                       #endif
+                      }
                   }
               }];
 
