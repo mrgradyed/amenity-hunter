@@ -30,9 +30,9 @@
 
 #pragma mark - UTILITY METHODS
 
-- (void)networkActivityStarted { self.networkActivitiesCount++; }
+- (void)networkActivityDidStart { self.networkActivitiesCount++; }
 
-- (void)networkActivityStopped { self.networkActivitiesCount--; }
+- (void)networkActivityDidStop { self.networkActivitiesCount--; }
 
 #pragma mark - CLASS METHODS
 
@@ -63,10 +63,10 @@
     // Return an exception if someone try to use the default init
     // instead of creating a singleton by using the class method.
 
-    @throw [NSException
-        exceptionWithName:@"SingletonException"
-                   reason:@"Please use: [NetworkIndicatorSharedController sharedInstance] instead."
-                 userInfo:nil];
+    @throw [NSException exceptionWithName:@"SingletonException"
+                                   reason:@"Please use: [NetworkIndicatorSharedController "
+                                   @"sharedInstance] instead."
+                                 userInfo:nil];
 
     return nil;
 }

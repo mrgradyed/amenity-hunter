@@ -16,9 +16,9 @@
 
 #pragma mark - PUBLIC METHODS
 
-- (void)networkActivityStarted;
+- (void)networkActivityDidStart;
 
-- (void)networkActivityStopped;
+- (void)networkActivityDidStop;
 
 + (instancetype)sharedInstance;
 

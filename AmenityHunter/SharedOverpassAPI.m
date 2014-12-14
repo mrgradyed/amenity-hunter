@@ -189,7 +189,7 @@ static int const overpassServerTimeout = 5;
         downloadTaskWithRequest:request
               completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
 
-                  [[NetworkIndicatorSharedController sharedInstance] networkActivityStopped];
+                  [[NetworkIndicatorSharedController sharedInstance] networkActivityDidStop];
 
                   if (!error)
                   {
@@ -232,7 +232,7 @@ static int const overpassServerTimeout = 5;
 
     [downloadTask resume];
 
-    [[NetworkIndicatorSharedController sharedInstance] networkActivityStarted];
+    [[NetworkIndicatorSharedController sharedInstance] networkActivityDidStart];
 }
 
 @end
