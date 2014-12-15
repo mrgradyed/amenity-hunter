@@ -149,9 +149,18 @@
                                              selector:@selector(handleOverpassData:)
                                                  name:gOverpassDataFetchedNotification
                                                object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleFetchingFailure)
+                                                 name:gOverpassFetchingFailedNotification
+                                               object:nil];
 }
 
-- (void)dealloc { [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:nil]; }
+- (void)dealloc
+{
+    // Remove this controller object from all notifications listening.
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:nil];
+}
 
 #pragma mark - MKMapViewDelegate
 
@@ -299,6 +308,18 @@
     }
 
     [self refreshMapAnnotations];
+}
+
+
+- (void)handleFetchingFailure {
+
+    // Try refetching...
+    [self fetchOverpassData];
+
+#if DEBUG
+    NSLog(@"Fetching failed. Try refetching.");
+#endif
+
 }
 
 - (void)refreshMapAnnotations
