@@ -185,7 +185,7 @@
             [[MKPinAnnotationView alloc] initWithAnnotation:annotation
                                             reuseIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
-        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
+        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorGreen;
         ((MKPinAnnotationView *)annotationView).canShowCallout = YES;
     }
 
@@ -312,6 +312,7 @@
         if (!elementName)
         {
             annotation.title = elementType;
+            annotation.subtitle = nil;
         }
 
         [self.mapAmenityAnnotations addObject:annotation];
@@ -322,7 +323,6 @@
 
 - (void)handleFetchingFailure
 {
-
     // Try refetching...
     [self fetchOverpassData];
 
