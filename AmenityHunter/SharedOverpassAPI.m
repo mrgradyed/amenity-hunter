@@ -34,7 +34,7 @@ static int const overpassServerTimeout = 5;
 // fetched data. This should avoid requesting same data multiple times when the
 // map does small
 // region changes.
-@property(nonatomic, strong) NSMutableDictionary *recentRequestsAndData;
+@property(nonatomic, strong) NSMutableDictionary *recentDataCache;
 
 @end
 
@@ -42,13 +42,13 @@ static int const overpassServerTimeout = 5;
 
 #pragma mark - ACCESSORS
 
-- (NSDictionary *)recentRequestsAndData
+- (NSDictionary *)recentDataCache
 {
-    if (!_recentRequestsAndData)
+    if (!_recentDataCache)
     {
-        _recentRequestsAndData = [[NSMutableDictionary alloc] init];
+        _recentDataCache = [[NSMutableDictionary alloc] init];
     }
-    return _recentRequestsAndData;
+    return _recentDataCache;
 }
 
 - (void)setLastFetchedData:(NSMutableDictionary *)lastFetchedData
@@ -138,7 +138,7 @@ static int const overpassServerTimeout = 5;
 #endif
 
     // Check if request has been performed recently.
-    NSDictionary *recentlyFetchedData = self.recentRequestsAndData[requestString];
+    NSDictionary *recentlyFetchedData = self.recentDataCache[requestString];
 
     if (recentlyFetchedData)
     {
@@ -175,7 +175,6 @@ static int const overpassServerTimeout = 5;
                 #endif
             }
         }
-
     }];
 
     // The request URL for the new task.
@@ -196,34 +195,52 @@ static int const overpassServerTimeout = 5;
                   {
                       // Task completed!
 
-                      // Put the retrieved JSON data in a dictionary.
-                      self.lastFetchedData = [NSJSONSerialization
-                          JSONObjectWithData:[NSData dataWithContentsOfURL:location]
-                                     options:0
-                                       error:nil];
-
                       // We want the recent requests and data cache small.
-                      if ([self.recentRequestsAndData count] > 20)
+                      if ([self.recentDataCache count] > 20)
                       {
                           // If the recent requests dictionary has grown too much,
                           // reset it.
-                          self.recentRequestsAndData = nil;
+                          self.recentDataCache = nil;
 
                           #if DEBUG
                           NSLog(@"CACHE RESET.\n\n");
                           #endif
                       }
 
-                      // Adding response data to recent requests dictionary.
-                      self.recentRequestsAndData[requestString] = self.lastFetchedData;
+                      if (self.lastFetchedData)
+                      {
+                          // Put the retrieved JSON data in a dictionary.
+                          self.lastFetchedData = [NSJSONSerialization
+                              JSONObjectWithData:[NSData dataWithContentsOfURL:location]
+                                         options:0
+                                           error:nil];
+
+                          // Adding response data to recent requests data cache.
+                          self.recentDataCache[requestString] = self.lastFetchedData;
 
                       #if DEBUG
-                      NSLog(@"NEW DATA HAS BEEN FETCHED!\n\n");
+                          NSLog(@"NEW DATA HAS BEEN FETCHED!\n\n");
                       #endif
+                      }
+                      else
+                      {
+                          // Request succesful but no data returned. Wrong query syntax?
+                          // Task failed. Let's notify this.
+                          [[NSNotificationCenter defaultCenter]
+                              postNotification:
+                                  [NSNotification
+                                      notificationWithName:gOverpassFetchingFailedNotification
+                                                    object:self
+                                                  userInfo:nil]];
+
+                          #if DEBUG
+                          NSLog(@"NULL DATA RECEIVED: %@\n\n", requestString);
+                          #endif
+                      }
                   }
                   else
                   {
-
+                      // Task's code -999 stays for "cancelled".
                       if (error.code == -999)
                       {
                           // Task cancelled.
