@@ -195,6 +195,12 @@ static int const overpassServerTimeout = 5;
                   {
                       // Task completed!
 
+                      // Put the retrieved JSON data in a dictionary.
+                      self.lastFetchedData = [NSJSONSerialization
+                          JSONObjectWithData:[NSData dataWithContentsOfURL:location]
+                                     options:0
+                                       error:nil];
+
                       // We want the recent requests and data cache small.
                       if ([self.recentDataCache count] > 20)
                       {
@@ -204,18 +210,12 @@ static int const overpassServerTimeout = 5;
 
                           #if DEBUG
                           NSLog(@"CACHE RESET.\n\n");
-                          #endif
+                        #endif
                       }
 
                       if (self.lastFetchedData)
                       {
-                          // Put the retrieved JSON data in a dictionary.
-                          self.lastFetchedData = [NSJSONSerialization
-                              JSONObjectWithData:[NSData dataWithContentsOfURL:location]
-                                         options:0
-                                           error:nil];
-
-                          // Adding response data to recent requests data cache.
+                          // Adding response data to recent data cache.
                           self.recentDataCache[requestString] = self.lastFetchedData;
 
                       #if DEBUG
