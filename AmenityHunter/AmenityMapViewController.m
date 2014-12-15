@@ -186,6 +186,7 @@
                                             reuseIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
         ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
+        ((MKPinAnnotationView *)annotationView).canShowCallout = YES;
     }
 
     return annotationView;
@@ -279,6 +280,10 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
+#if DEBUG
+    NSLog(@"%@", notification.userInfo);
+#endif
+
     self.mapAmenityAnnotations = nil;
 
     id elements = [notification.userInfo valueForKey:@"elements"];
@@ -304,14 +309,19 @@
         annotation.title = elementName;
         annotation.subtitle = elementType;
 
+        if (!elementName)
+        {
+            annotation.title = elementType;
+        }
+
         [self.mapAmenityAnnotations addObject:annotation];
     }
 
     [self refreshMapAnnotations];
 }
 
-
-- (void)handleFetchingFailure {
+- (void)handleFetchingFailure
+{
 
     // Try refetching...
     [self fetchOverpassData];
@@ -319,7 +329,6 @@
 #if DEBUG
     NSLog(@"Fetching failed. Try refetching.");
 #endif
-
 }
 
 - (void)refreshMapAnnotations
