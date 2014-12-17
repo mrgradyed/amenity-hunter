@@ -196,69 +196,51 @@ static int const overpassServerTimeout = 5;
                       // Task completed!
 
                       // Put the retrieved JSON data in a dictionary.
-                      self.lastFetchedData = [NSJSONSerialization
+                      id fetchedData = [NSJSONSerialization
                           JSONObjectWithData:[NSData dataWithContentsOfURL:location]
                                      options:0
                                        error:nil];
 
-                      // We want the recent requests and data cache small.
-                      if ([self.recentDataCache count] > 20)
+                      NSLog(@"%@\n\n", fetchedData);
+
+                      if (![self areValidOverpassData:fetchedData])
                       {
-                          // If the recent requests dictionary has grown too much,
-                          // reset it.
-                          self.recentDataCache = nil;
+                          // No valid data received!
+
+                          // Request succesful but no data returned. Wrong query syntax?
+                          // Task failed. Let's notify this.
+                          [self notifyTaskFailed];
 
                           #if DEBUG
-                          NSLog(@"CACHE RESET.\n\n");
-                        #endif
-                      }
-
-                      if (self.lastFetchedData)
-                      {
-                          // Adding response data to recent data cache.
-                          self.recentDataCache[requestString] = self.lastFetchedData;
-
-                      #if DEBUG
-                          NSLog(@"NEW DATA HAS BEEN FETCHED!\n\n");
-                      #endif
+                          NSLog(@"INVALID DATA RECEIVED: %@\n\n", requestString);
+                          #endif
                       }
                       else
                       {
-                          // Request succesful but no data returned. Wrong query syntax?
-                          // Task failed. Let's notify this.
-                          [[NSNotificationCenter defaultCenter]
-                              postNotification:
-                                  [NSNotification
-                                      notificationWithName:gOverpassFetchingFailedNotification
-                                                    object:self
-                                                  userInfo:nil]];
+                          // All OK. Valid data received!
+
+                          // Set the new valid fetched data.
+                          self.lastFetchedData = fetchedData;
+
+                          // Cache the new valid fetched data.
+                          [self cacheFetchedData:self.lastFetchedData withRequest:requestString];
 
                           #if DEBUG
-                          NSLog(@"NULL DATA RECEIVED: %@\n\n", requestString);
+                          NSLog(@"NEW DATA FETCHED!\n\n");
                           #endif
                       }
                   }
                   else
                   {
+                      // Task failed!
+
                       // Task's code -999 stays for "cancelled".
-                      if (error.code == -999)
+                      if (error.code != -999)
                       {
-                          // Task cancelled.
-                          #if DEBUG
-                          NSLog(@"REQUEST CANCELLED: %@\n\n", requestString);
-                          #endif
-                      }
-                      else
-                      {
-                          // Task failed. Let's notify this.
-                          [[NSNotificationCenter defaultCenter]
-                              postNotification:
-                                  [NSNotification
-                                      notificationWithName:gOverpassFetchingFailedNotification
-                                                    object:self
-                                                  userInfo:nil]];
+                          [self notifyTaskFailed];
+
                       #if DEBUG
-                          NSLog(@"REQUEST FAILED: %@\n\n", requestString);
+                          NSLog(@"TASK FAILED WITH ERROR: %ld\n\n", (long)error.code);
                       #endif
                       }
                   }
@@ -267,6 +249,54 @@ static int const overpassServerTimeout = 5;
     [downloadTask resume];
 
     [[NetworkIndicatorSharedController sharedInstance] networkActivityDidStart];
+}
+
+- (void)notifyTaskFailed
+{
+    // Task failed. Let's notify this.
+    [[NSNotificationCenter defaultCenter]
+        postNotification:[NSNotification notificationWithName:gOverpassFetchingFailedNotification
+                                                       object:self
+                                                     userInfo:nil]];
+}
+
+- (void)cacheFetchedData:(id)fetchedData withRequest:(NSString *)request
+{
+    // We want the recent requests and data cache small.
+    if ([self.recentDataCache count] > 20)
+    {
+        // If the recent requests dictionary has grown too much,
+        // reset it.
+        self.recentDataCache = nil;
+
+#if DEBUG
+        NSLog(@"CACHE RESET.\n\n");
+#endif
+    }
+
+    if (fetchedData)
+    {
+        // Adding response data to recent data cache.
+        self.recentDataCache[request] = fetchedData;
+    }
+}
+
+- (BOOL)areValidOverpassData:(NSDictionary *)fetchedData
+{
+    // Sometimes fetching task is succesful but we receive null or empty JSON data
+    // (es: query timeout).
+
+    NSArray *elements = [fetchedData valueForKey:@"elements"];
+    id remark = [fetchedData valueForKey:@"remark"];
+
+    // If data are null or JSON data contains no elements with a server string error
+    // then data are invalid.
+    if (!fetchedData || (![elements count] && remark))
+    {
+        return NO;
+    }
+
+    return YES;
 }
 
 @end
