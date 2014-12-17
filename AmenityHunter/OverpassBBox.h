@@ -53,4 +53,6 @@
 // This method converts the BBox to a string usable in the OverpassQL queries.
 - (NSString *)overpassString;
 
+- (NSComparisonResult)compare:(OverpassBBox *)otherBBOX;
+
 @end

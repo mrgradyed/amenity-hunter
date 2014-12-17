@@ -159,4 +159,48 @@
     return overpassString;
 }
 
+#pragma mark - Equality and Comparison
+
+- (BOOL)isEqual:(id)object
+{
+    if (![object isKindOfClass:[self class]])
+    {
+        return NO;
+    }
+
+    OverpassBBox *otherBBOX = (OverpassBBox *)object;
+
+    BOOL isLatitudeEqual = (self.lowestLatitude == otherBBOX.lowestLatitude) &&
+                           (self.highestLatitude == otherBBOX.highestLatitude);
+
+    BOOL isLongitudeEqual = (self.lowestLongitude == otherBBOX.lowestLongitude) &&
+                            (self.highestLongitude == otherBBOX.highestLongitude);
+
+    return isLatitudeEqual && isLongitudeEqual;
+}
+
+- (NSComparisonResult)compare:(OverpassBBox *)otherBBOX
+{
+    double thisLatitudeHeight = fabs(self.highestLatitude - self.lowestLatitude);
+    double thisLongitudedWidth = fabs(self.highestLongitude - self.lowestLongitude);
+
+    double otherLatitudeHeight = fabs(otherBBOX.highestLatitude - otherBBOX.lowestLatitude);
+    double otherLongitudedWidth = fabs(otherBBOX.highestLongitude - otherBBOX.lowestLongitude);
+
+    double thisArea = thisLatitudeHeight * thisLongitudedWidth;
+    double otherArea = otherLatitudeHeight * otherLongitudedWidth;
+
+    if (thisArea > otherArea)
+    {
+        return NSOrderedDescending;
+    }
+
+    if (thisArea < otherArea)
+    {
+        return NSOrderedAscending;
+    }
+
+    return NSOrderedSame;
+}
+
 @end
