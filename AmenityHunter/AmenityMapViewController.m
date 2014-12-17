@@ -24,6 +24,7 @@
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 @property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
 @property(nonatomic) MKMapRect visibleMapArea;
+@property(nonatomic) NSInteger refetches;
 
 @end
 
@@ -280,9 +281,8 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-#if DEBUG
-    NSLog(@"%@", notification.userInfo);
-#endif
+    // New valid data acquired. Reset refetches counter.
+    self.refetches = 0;
 
     self.mapAmenityAnnotations = nil;
 
@@ -323,12 +323,22 @@
 
 - (void)handleFetchingFailure
 {
-    // Try refetching...
-    [self fetchOverpassData];
+    // The user moved the map or changed amenity type
+    // so even if the fetch query failed, delete off map annotations to improve performance.
+    [self removeOffMapAnnotations];
+
+    // Let's limit refetches.
+    if (self.refetches < 3)
+    {
+        // Try refetching...
+        [self fetchOverpassData];
+
+        self.refetches++;
 
 #if DEBUG
-    NSLog(@"Fetching failed. Try refetching.");
+        NSLog(@"Fetching failed. Refetch n.%d", self.refetches);
 #endif
+    }
 }
 
 - (void)refreshMapAnnotations
@@ -336,10 +346,8 @@
     NSArray *currentAnnotations = [self.mapView.annotations copy];
 
     // This code causes UI operations to be executed, so it must be run on the
-    // main queue to avoid
-    // conflicts accessing the annotations, and thus the error: "Collection was
-    // mutated while being
-    // enumerated".
+    // main queue to avoid conflicts accessing the annotations, and thus the error:
+    // "Collection was mutated while being enumerated".
     dispatch_async(dispatch_get_main_queue(), ^{
 
         [self.mapView removeAnnotations:currentAnnotations];
@@ -362,14 +370,6 @@
             [self.mapView removeAnnotation:annotation];
         }
     }
-
-#if DEBUG
-    NSLog(@"VISIBLE ANNOTATIONS: %lu\n\n", (unsigned long)[visibleAnnotations count]);
-#endif
-
-#if DEBUG
-    NSLog(@"ALL ANNOTATIONS: %lu\n\n", (unsigned long)[visibleAnnotations count]);
-#endif
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
