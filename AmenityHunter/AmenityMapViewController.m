@@ -23,6 +23,7 @@
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 @property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
+@property(strong, nonatomic) OverpassBBox *maxBoundingBox;
 @property(nonatomic) MKMapRect visibleMapArea;
 @property(nonatomic) NSInteger refetches;
 
@@ -110,6 +111,19 @@
     return _overpassAPIsharedInstance = [SharedOverpassAPI sharedInstance];
 }
 
+- (OverpassBBox *)maxBoundingBox
+{
+    if (!_maxBoundingBox)
+    {
+        _maxBoundingBox = [[OverpassBBox alloc] initWithLowestLatitude:0.0
+                                                       lowestLongitude:0.0
+                                                       highestLatitude:0.5
+                                                      highestLongitude:0.5];
+    }
+
+    return _maxBoundingBox;
+}
+
 - (MKMapRect)visibleMapArea { return _visibleMapArea = self.mapView.visibleMapRect; }
 
 - (void)setMapView:(MKMapView *)mapView
@@ -167,7 +181,20 @@
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
-    [self fetchOverpassData];
+    if (self.selectedAmenityType)
+    {
+        OverpassBBox *currentBBOX = [self overpassBBoxFromVisibleMapArea];
+
+        if ([currentBBOX compare:self.maxBoundingBox] == NSOrderedDescending)
+        {
+            MKCoordinateRegion maxRegion =
+                MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
+
+            [self.mapView setRegion:maxRegion animated:YES];
+        }
+
+        [self fetchOverpassData];
+    }
 }
 
 - (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
@@ -186,7 +213,7 @@
             [[MKPinAnnotationView alloc] initWithAnnotation:annotation
                                             reuseIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
-        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorGreen;
+        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
         ((MKPinAnnotationView *)annotationView).canShowCallout = YES;
     }
 
@@ -336,7 +363,7 @@
         self.refetches++;
 
 #if DEBUG
-        NSLog(@"Fetching failed. Refetch n.%d", self.refetches);
+        NSLog(@"Fetching failed. Refetch n.%ld", (long)self.refetches);
 #endif
     }
 }

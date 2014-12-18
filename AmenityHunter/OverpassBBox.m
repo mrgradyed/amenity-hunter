@@ -103,6 +103,14 @@
     }
 }
 
+- (MKCoordinateSpan)span
+{
+    double latitudeDelta = fabs(self.highestLatitude - self.lowestLatitude);
+    double longitudedDelta = fabs(self.highestLongitude - self.lowestLongitude);
+
+    return MKCoordinateSpanMake(latitudeDelta, longitudedDelta);
+}
+
 #pragma mark - INIT
 
 // Designated init
@@ -181,14 +189,11 @@
 
 - (NSComparisonResult)compare:(OverpassBBox *)otherBBOX
 {
-    double thisLatitudeHeight = fabs(self.highestLatitude - self.lowestLatitude);
-    double thisLongitudedWidth = fabs(self.highestLongitude - self.lowestLongitude);
+    double thisArea = self.span.latitudeDelta * self.span.longitudeDelta;
+    double otherArea = otherBBOX.span.latitudeDelta * otherBBOX.span.longitudeDelta;
 
-    double otherLatitudeHeight = fabs(otherBBOX.highestLatitude - otherBBOX.lowestLatitude);
-    double otherLongitudedWidth = fabs(otherBBOX.highestLongitude - otherBBOX.lowestLongitude);
-
-    double thisArea = thisLatitudeHeight * thisLongitudedWidth;
-    double otherArea = otherLatitudeHeight * otherLongitudedWidth;
+    NSLog(@"%@", [self overpassString]);
+    NSLog(@"%@", [otherBBOX overpassString]);
 
     if (thisArea > otherArea)
     {

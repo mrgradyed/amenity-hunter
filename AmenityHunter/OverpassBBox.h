@@ -7,6 +7,7 @@
 //
 
 @import Foundation;
+@import MapKit;
 
 @interface OverpassBBox : NSObject
 
@@ -15,7 +16,8 @@
 // Latitude is a decimal number between -90.0 and 90.0.
 // Longitude is a decimal number between -180.0 and 180.0.
 
-// lowest latitude, measured along a meridian from the nearest point on the Equator, negative in the
+// lowest latitude, measured along a meridian from the nearest point
+// on the Equator, negative in the
 // Southern Hemisphere
 
 @property(nonatomic, readonly) double lowestLatitude;
@@ -32,6 +34,8 @@
 
 // highest longitude, measured along a parallel from the nearest point on the Greenwich meridian,
 // positive in the Eastern Hemisphere
+
+@property(nonatomic, readonly) MKCoordinateSpan span;
 
 @property(nonatomic, readonly) double highestLongitude;
 
