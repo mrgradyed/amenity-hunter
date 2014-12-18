@@ -150,6 +150,8 @@
 
     _selectedAmenityType = selectedAmenityType;
 
+    [self reduceRegionIfBiggerThanMaxRegion];
+
     [self fetchOverpassData];
 }
 
@@ -179,19 +181,17 @@
 
 #pragma mark - MKMapViewDelegate
 
+- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
+{
+    // User has moved the map, remove the "old" annotations to improve performance.
+    [self removeAllMapAnnotations];
+}
+
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
     if (self.selectedAmenityType)
     {
-        OverpassBBox *currentBBOX = [self overpassBBoxFromVisibleMapArea];
-
-        if ([currentBBOX compare:self.maxBoundingBox] == NSOrderedDescending)
-        {
-            MKCoordinateRegion maxRegion =
-                MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
-
-            [self.mapView setRegion:maxRegion animated:YES];
-        }
+        [self reduceRegionIfBiggerThanMaxRegion];
 
         [self fetchOverpassData];
     }
@@ -299,6 +299,10 @@
 
 - (void)fetchOverpassData
 {
+    // User has set a new amenity type or has moved the map,
+    // we're going to fetch new data, remove the "old" annotations to improve performance.
+    [self removeAllMapAnnotations];
+
     self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
 
     self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
@@ -311,7 +315,7 @@
     // New valid data acquired. Reset refetches counter.
     self.refetches = 0;
 
-    self.mapAmenityAnnotations = nil;
+    [self removeAllMapAnnotations];
 
     id elements = [notification.userInfo valueForKey:@"elements"];
 
@@ -350,10 +354,6 @@
 
 - (void)handleFetchingFailure
 {
-    // The user moved the map or changed amenity type
-    // so even if the fetch query failed, delete off map annotations to improve performance.
-    [self removeOffMapAnnotations];
-
     // Let's limit refetches.
     if (self.refetches < 3)
     {
@@ -384,19 +384,17 @@
     });
 }
 
-- (void)removeOffMapAnnotations
+- (void)removeAllMapAnnotations
 {
-    NSSet *visibleAnnotations = [self.mapView annotationsInMapRect:self.visibleMapArea];
+    self.mapAmenityAnnotations = nil;
 
-    NSMutableArray *allAnnotations = [self.mapView.annotations copy];
+    NSArray *currentAnnotations = [self.mapView.annotations copy];
 
-    for (id<MKAnnotation> annotation in allAnnotations)
-    {
-        if (![visibleAnnotations containsObject:annotation])
-        {
-            [self.mapView removeAnnotation:annotation];
-        }
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+
+        [self.mapView removeAnnotations:currentAnnotations];
+
+    });
 }
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
@@ -422,16 +420,17 @@
                                        highestLongitude:highestLongitude];
 }
 
-/*
-#pragma mark - Navigation
+- (void)reduceRegionIfBiggerThanMaxRegion
+{
+    OverpassBBox *currentBBOX = [self overpassBBoxFromVisibleMapArea];
 
-// In a storyboard-based application, you will often want to do a little
-preparation before
-navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    if ([currentBBOX compare:self.maxBoundingBox] == NSOrderedDescending)
+    {
+        MKCoordinateRegion maxRegion =
+            MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
+
+        [self.mapView setRegion:maxRegion animated:YES];
+    }
 }
-*/
 
 @end

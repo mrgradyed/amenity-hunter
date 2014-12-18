@@ -171,7 +171,7 @@ static int const overpassServerTimeout = 5;
                 [task cancel];
 
                 #if DEBUG
-                NSLog(@"CANCELING %@!\n\n", task.originalRequest.URL);
+                NSLog(@"CANCELING %@\n\n", task.originalRequest.URL);
                 #endif
             }
         }
@@ -200,8 +200,6 @@ static int const overpassServerTimeout = 5;
                           JSONObjectWithData:[NSData dataWithContentsOfURL:location]
                                      options:0
                                        error:nil];
-
-                      NSLog(@"%@\n\n", fetchedData);
 
                       if (![self areValidOverpassData:fetchedData])
                       {

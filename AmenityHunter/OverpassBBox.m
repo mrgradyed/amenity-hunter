@@ -192,9 +192,6 @@
     double thisArea = self.span.latitudeDelta * self.span.longitudeDelta;
     double otherArea = otherBBOX.span.latitudeDelta * otherBBOX.span.longitudeDelta;
 
-    NSLog(@"%@", [self overpassString]);
-    NSLog(@"%@", [otherBBOX overpassString]);
-
     if (thisArea > otherArea)
     {
         return NSOrderedDescending;
