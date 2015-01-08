@@ -50,7 +50,7 @@
     {
         // Invalid latitude value, raise an exception.
         @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"lowestLatitude MUST be between [-90.0, 90.0]"
+                                       reason:@"lowestLatitude MUST be between [-90.0, +90.0]"
                                      userInfo:nil];
     }
 }
@@ -66,7 +66,7 @@
     {
         // Invalid longitude value, raise an exception.
         @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"lowestLongitude MUST be between [-180.0, 180.0]"
+                                       reason:@"lowestLongitude MUST be between [-180.0, +180.0]"
                                      userInfo:nil];
     }
 }
@@ -82,7 +82,7 @@
     {
         // Invalid latitude value, raise an exception.
         @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"highestLatitude MUST be between [-90.0, 90.0]"
+                                       reason:@"highestLatitude MUST be between [-90.0, +90.0]"
                                      userInfo:nil];
     }
 }
@@ -98,17 +98,9 @@
     {
         // Invalid longitude value, raise an exception.
         @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"highestLongitude MUST be between [-180.0, 180.0]"
+                                       reason:@"highestLongitude MUST be between [-180.0, +180.0]"
                                      userInfo:nil];
     }
-}
-
-- (MKCoordinateSpan)span
-{
-    double latitudeDelta = fabs(self.highestLatitude - self.lowestLatitude);
-    double longitudedDelta = fabs(self.highestLongitude - self.lowestLongitude);
-
-    return MKCoordinateSpanMake(latitudeDelta, longitudedDelta);
 }
 
 #pragma mark - INIT
@@ -119,13 +111,13 @@
                        highestLatitude:(double)highestLatitude
                       highestLongitude:(double)highestLongitude
 {
-
     if ((lowestLatitude > highestLatitude) || (lowestLongitude > highestLongitude))
     {
-        @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                       reason:@"lowestLatitude must be lower than highestLatitude "
-                                       @"lowestLongitude must be lower than highestLongitude"
-                                     userInfo:nil];
+        @throw
+            [NSException exceptionWithName:@"InvalidCoordinatesException"
+                                    reason:@"lowestLatitude must be lower than highestLatitude and "
+                                    @"lowestLongitude must be lower than highestLongitude"
+                                  userInfo:nil];
     }
 
     self = [super init];
@@ -147,13 +139,23 @@
 
     if (self)
     {
-        self = [self initWithLowestLatitude:0.0
-                            lowestLongitude:0.0
-                            highestLatitude:0.0
-                           highestLongitude:0.0];
+        self = [self initWithLowestLatitude:-0.1
+                            lowestLongitude:-0.1
+                            highestLatitude:0.1
+                           highestLongitude:0.1];
     }
 
     return self;
+}
+
+#pragma mark - Utility
+
+- (MKCoordinateSpan)span
+{
+    double latitudeDelta = fabs(self.highestLatitude - self.lowestLatitude);
+    double longitudedDelta = fabs(self.highestLongitude - self.lowestLongitude);
+
+    return MKCoordinateSpanMake(latitudeDelta, longitudedDelta);
 }
 
 - (NSString *)overpassString
@@ -189,8 +191,8 @@
 
 - (NSComparisonResult)compare:(OverpassBBox *)otherBBOX
 {
-    double thisArea = self.span.latitudeDelta * self.span.longitudeDelta;
-    double otherArea = otherBBOX.span.latitudeDelta * otherBBOX.span.longitudeDelta;
+    double thisArea = [self span].latitudeDelta * [self span].longitudeDelta;
+    double otherArea = [otherBBOX span].latitudeDelta * [otherBBOX span].longitudeDelta;
 
     if (thisArea > otherArea)
     {

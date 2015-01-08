@@ -61,16 +61,14 @@
 - (void)testOverpassBBoxInit
 {
     // Test if exception is thrown when initialising bbox with lowest latitude
-    // greater than highest
-    // latitude.
+    // greater than highest latitude.
     XCTAssertThrows([[OverpassBBox alloc] initWithLowestLatitude:2.0
                                                  lowestLongitude:1.0
                                                  highestLatitude:1.0
                                                 highestLongitude:1.0]);
 
     // Test if exception is thrown when initialising bbox with lowest longitude
-    // greater than
-    // highest longitude.
+    // greater than highest longitude.
     XCTAssertThrows([[OverpassBBox alloc] initWithLowestLatitude:1.0
                                                  lowestLongitude:2.0
                                                  highestLatitude:1.0
@@ -91,10 +89,16 @@
                                                 highestLongitude:1.0]);
 
     // Test if exception is NOT thrown when initialising bbox with extreme values.
-    XCTAssertNoThrow([[OverpassBBox alloc] initWithLowestLatitude:90.0
-                                                  lowestLongitude:180.0
+    XCTAssertNoThrow([[OverpassBBox alloc] initWithLowestLatitude:-90.0
+                                                  lowestLongitude:-180.0
                                                   highestLatitude:90.0
                                                  highestLongitude:180.0]);
+
+    // Test if exception is NOT thrown when initialising bbox with equal values.
+    XCTAssertNoThrow([[OverpassBBox alloc] initWithLowestLatitude:0
+                                                  lowestLongitude:0
+                                                  highestLatitude:0
+                                                 highestLongitude:0]);
 }
 
 @end
