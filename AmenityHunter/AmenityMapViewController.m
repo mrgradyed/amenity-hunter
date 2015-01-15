@@ -312,6 +312,8 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
+    NSLog(@"%@", notification.userInfo);
+
     // New valid data acquired. Reset refetches counter.
     self.refetches = 0;
 

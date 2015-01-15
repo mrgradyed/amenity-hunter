@@ -37,11 +37,11 @@
         NSArray *sustenanceAmenities = @[ @"bar", @"cafe", @"fast_food", @"ice_cream", @"pub", @"restaurant" ];
 
         NSArray *transportationAmenities =
-            @[ @"bicycle_rental", @"bus_station", @"car_rental", @"fuel", @"parking", @"taxi" ];
+            @[ @"bicycle_rental", @"bus_stop", @"car_rental", @"fuel", @"parking", @"taxi" ];
 
         NSArray *financialAmenities = @[ @"atm", @"bank" ];
 
-        NSArray *entertainmentAmenities = @[ @"arts_centre", @"cinema", @"theatre" ];
+        NSArray *entertainmentAmenities = @[ @"cinema", @"theatre" ];
 
         NSArray *otherAmenities = @[ @"marketplace", @"post_office", @"toilets" ];
 
@@ -93,9 +93,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-// Return the number of rows in the section.
-
-#warning INCOMPLETE IMPLEMENTATION.
+    // Return the number of rows in the section.
 
     return [self.amenityTypes[section] count];
 }
@@ -106,8 +104,6 @@
 
     // Configure the cell...
     cell.textLabel.text = self.amenityTypes[indexPath.section][indexPath.row];
-
-#warning INCOMPLETE IMPLEMENTATION.
 
     return cell;
 }
