@@ -11,8 +11,8 @@
 
 @interface AmenityTableViewController ()
 
-@property(nonatomic, strong) NSArray *amenitiesCategories;
-@property(nonatomic, strong) NSArray *amenitiesTypes;
+@property(nonatomic, strong) NSArray *amenityCategories;
+@property(nonatomic, strong) NSArray *amenityTypes;
 
 @end
 
@@ -20,41 +20,41 @@
 
 #pragma mark - ACCESSORS
 
-- (NSArray *)amenitiesCategories
+- (NSArray *)amenityCategories
 {
-    if (!_amenitiesCategories)
+    if (!_amenityCategories)
     {
-        _amenitiesCategories = @[ @"Sustenance", @"Transportation", @"Financial" ];
+        _amenityCategories = @[ @"Sustenance", @"Transportation", @"Financial", @"Entertainment", @"Others" ];
     }
 
-    return _amenitiesCategories;
+    return _amenityCategories;
 }
 
-- (NSArray *)amenitiesTypes
+- (NSArray *)amenityTypes
 {
-    if (!_amenitiesTypes)
+    if (!_amenityTypes)
     {
-        NSArray *sustenanceAmenities = @[
-            @"bar",
-            @"biergarten",
-            @"cafe",
-            @"drinking_water",
-            @"fast_food",
-            @"food_court",
-            @"ice_cream",
-            @"pub",
-            @"restaurant"
-        ];
+        NSArray *sustenanceAmenities = @[ @"bar", @"cafe", @"fast_food", @"ice_cream", @"pub", @"restaurant" ];
 
         NSArray *transportationAmenities =
             @[ @"bicycle_rental", @"bus_station", @"car_rental", @"fuel", @"parking", @"taxi" ];
 
         NSArray *financialAmenities = @[ @"atm", @"bank" ];
 
-        _amenitiesTypes = @[ sustenanceAmenities, transportationAmenities, financialAmenities ];
+        NSArray *entertainmentAmenities = @[ @"arts_centre", @"cinema", @"theatre" ];
+
+        NSArray *otherAmenities = @[ @"marketplace", @"post_office", @"toilets" ];
+
+        _amenityTypes = @[
+            sustenanceAmenities,
+            transportationAmenities,
+            financialAmenities,
+            entertainmentAmenities,
+            otherAmenities
+        ];
     }
 
-    return _amenitiesTypes;
+    return _amenityTypes;
 }
 
 #pragma mark - LIFECYCLE
@@ -88,7 +88,7 @@
 
 #warning INCOMPLETE IMPLEMENTATION.
 
-    return [self.amenitiesCategories count];
+    return [self.amenityCategories count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -97,17 +97,15 @@
 
 #warning INCOMPLETE IMPLEMENTATION.
 
-    return [self.amenitiesTypes[section] count];
+    return [self.amenityTypes[section] count];
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell =
-        [tableView dequeueReusableCellWithIdentifier:@"AmenityTableCell" forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"AmenityTableCell" forIndexPath:indexPath];
 
     // Configure the cell...
-    cell.textLabel.text = self.amenitiesTypes[indexPath.section][indexPath.row];
+    cell.textLabel.text = self.amenityTypes[indexPath.section][indexPath.row];
 
 #warning INCOMPLETE IMPLEMENTATION.
 
@@ -116,12 +114,12 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return self.amenitiesCategories[section];
+    return self.amenityCategories[section];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *selectedAmenity = self.amenitiesTypes[indexPath.section][indexPath.row];
+    NSString *selectedAmenity = self.amenityTypes[indexPath.section][indexPath.row];
 
     [self setAmenityInMapController:selectedAmenity];
 }
