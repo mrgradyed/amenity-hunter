@@ -22,8 +22,7 @@
 @import MapKit;
 @import CoreLocation;
 
-@interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate,
-                                        UIAlertViewDelegate>
+@interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
 @property(weak, nonatomic) IBOutlet MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
@@ -58,13 +57,12 @@
     if (!_locationDeniedAlertView)
     {
         // UIAlertView is deprecated in iOS 8. We should use UIAlertController.
-        _locationDeniedAlertView =
-            [[UIAlertView alloc] initWithTitle:@"Location Settings"
-                                       message:@"Amenity Hunter cannot access your location."
-                                       @"Your location is needed to show amenities near you."
-                                      delegate:self
-                             cancelButtonTitle:@"OK"
-                             otherButtonTitles:nil];
+        _locationDeniedAlertView = [[UIAlertView alloc] initWithTitle:@"Location Settings"
+                                                              message:@"Amenity Hunter cannot access your location."
+                                                              @"Your location is needed to show amenities near you."
+                                                             delegate:self
+                                                    cancelButtonTitle:@"OK"
+                                                    otherButtonTitles:nil];
     }
 
     return _locationDeniedAlertView;
@@ -74,15 +72,14 @@
 {
     if (!_locationDeniedAlertController)
     {
-        _locationDeniedAlertController = [UIAlertController
-            alertControllerWithTitle:@"Location Settings"
-                             message:@"Amenity Hunter cannot access your location."
-                             @"Your location is needed to show amenities near you."
-                      preferredStyle:UIAlertControllerStyleAlert];
+        _locationDeniedAlertController =
+            [UIAlertController alertControllerWithTitle:@"Location Settings"
+                                                message:@"Amenity Hunter cannot access your location."
+                                                @"Your location is needed to show amenities near you."
+                                         preferredStyle:UIAlertControllerStyleAlert];
 
-        UIAlertAction *canceButton = [UIAlertAction actionWithTitle:@"Continue anyway"
-                                                              style:UIAlertActionStyleCancel
-                                                            handler:nil];
+        UIAlertAction *canceButton =
+            [UIAlertAction actionWithTitle:@"Continue anyway" style:UIAlertActionStyleCancel handler:nil];
 
         UIAlertAction *settingsButton =
             [UIAlertAction actionWithTitle:@"Change location settings"
@@ -91,8 +88,7 @@
 
                                        // UIApplicationOpenSettingsURLString is iOS 8.0 and later
                                        // ONLY.
-                                       NSURL *settingsURL =
-                                           [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+                                       NSURL *settingsURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
 
                                        [[UIApplication sharedApplication] openURL:settingsURL];
                                    }];
@@ -132,7 +128,10 @@
     return _maxBoundingBox;
 }
 
-- (MKMapRect)visibleMapArea { return _visibleMapArea = self.mapView.visibleMapRect; }
+- (MKMapRect)visibleMapArea
+{
+    return _visibleMapArea = self.mapView.visibleMapRect;
+}
 
 - (void)setMapView:(MKMapView *)mapView
 {
@@ -217,12 +216,15 @@
 
     if (!annotationView)
     {
-        annotationView =
+        MKPinAnnotationView *pinAnnotationView =
             [[MKPinAnnotationView alloc] initWithAnnotation:annotation
                                             reuseIdentifier:gAmenityAnnotationViewReuseIdentifier];
 
-        ((MKPinAnnotationView *)annotationView).pinColor = MKPinAnnotationColorPurple;
-        ((MKPinAnnotationView *)annotationView).canShowCallout = YES;
+        pinAnnotationView.pinColor = MKPinAnnotationColorPurple;
+        pinAnnotationView.canShowCallout = YES;
+        pinAnnotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+
+        return pinAnnotationView;
     }
 
     return annotationView;
@@ -230,17 +232,14 @@
 
 #pragma mark - CLLocationManagerDelegate
 
-- (void)locationManager:(CLLocationManager *)manager
-    didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
     if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted)
     {
         if ([UIAlertController class])
         {
             // iOS 8 and higher.
-            [self presentViewController:self.locationDeniedAlertController
-                               animated:YES
-                             completion:nil];
+            [self presentViewController:self.locationDeniedAlertController animated:YES completion:nil];
         }
         else
         {
@@ -409,11 +408,11 @@
 
 - (OverpassBBox *)overpassBBoxFromVisibleMapArea
 {
-    MKMapPoint bottomLeftCorner = MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea),
-                                                 MKMapRectGetMaxY(self.visibleMapArea));
+    MKMapPoint bottomLeftCorner =
+        MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea), MKMapRectGetMaxY(self.visibleMapArea));
 
-    MKMapPoint topRightCorner = MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea),
-                                               MKMapRectGetMinY(self.visibleMapArea));
+    MKMapPoint topRightCorner =
+        MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea), MKMapRectGetMinY(self.visibleMapArea));
 
     CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
     CLLocationCoordinate2D topRightCornerCoordinates = MKCoordinateForMapPoint(topRightCorner);
@@ -436,8 +435,7 @@
 
     if ([currentBBOX compare:self.maxBoundingBox] == NSOrderedDescending)
     {
-        MKCoordinateRegion maxRegion =
-            MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
+        MKCoordinateRegion maxRegion = MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
 
         [self.mapView setRegion:maxRegion animated:YES];
     }
