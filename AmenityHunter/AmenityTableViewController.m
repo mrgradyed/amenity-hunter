@@ -6,8 +6,10 @@
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE
 //  SOFTWARE.
 //
 //  Created by emi on 21/11/14.
@@ -125,14 +127,19 @@
 {
     NSString *selectedAmenity = self.amenityTypes[indexPath.section][indexPath.row];
 
-    [self setAmenityInMapController:selectedAmenity];
+    [self setAmenityForMapController:selectedAmenity];
 }
 
 #pragma mark - UTILITY METHODS
 
-- (void)setAmenityInMapController:(NSString *)selectedAmenity
+- (void)setAmenityForMapController:(NSString *)selectedAmenity
 {
     id detailViewController = [self.splitViewController.viewControllers lastObject];
+
+    if ([detailViewController isKindOfClass:[UINavigationController class]])
+    {
+        detailViewController = [((UINavigationController *)detailViewController).viewControllers firstObject];
+    }
 
     if ([detailViewController isKindOfClass:[AmenityMapViewController class]])
     {

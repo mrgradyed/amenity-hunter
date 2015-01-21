@@ -168,7 +168,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleOverpassData:)
                                                  name:gOverpassDataFetchedNotification
@@ -228,6 +228,12 @@
     }
 
     return annotationView;
+}
+
+- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control {
+
+    [self performSegueWithIdentifier:@"amenityInfoSegue" sender:self];
+
 }
 
 #pragma mark - CLLocationManagerDelegate
