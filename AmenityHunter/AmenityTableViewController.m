@@ -98,7 +98,7 @@
 
 #warning INCOMPLETE IMPLEMENTATION.
 
-    return [self.amenityCategories count];
+    return self.amenityCategories.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -138,7 +138,7 @@
 
     if ([detailViewController isKindOfClass:[UINavigationController class]])
     {
-        detailViewController = [((UINavigationController *)detailViewController).viewControllers firstObject];
+        detailViewController = ((UINavigationController *)detailViewController).topViewController;
     }
 
     if ([detailViewController isKindOfClass:[AmenityMapViewController class]])

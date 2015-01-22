@@ -269,7 +269,7 @@ static int const overpassServerTimeout = 5;
 - (void)cacheFetchedData:(id)fetchedData withRequest:(NSString *)request
 {
     // We want the recent requests and data cache small.
-    if ([self.recentDataCache count] > 20)
+    if (self.recentDataCache.count > 20)
     {
         // If the recent requests dictionary has grown too much,
         // reset it.
@@ -297,7 +297,7 @@ static int const overpassServerTimeout = 5;
 
     // If data are null or JSON data contains no elements with a server string error
     // then data are invalid.
-    if (!fetchedData || (![elements count] && remark))
+    if (!fetchedData || (!elements.count && remark))
     {
         return NO;
     }
