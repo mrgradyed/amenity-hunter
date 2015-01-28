@@ -6,8 +6,10 @@
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE
 //  SOFTWARE.
 //
 //  Created by emi on 14/11/14.
@@ -18,13 +20,14 @@
 #import "SharedOverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
+#import "MapViewSharedController.h"
 
 @import MapKit;
 @import CoreLocation;
 
 @interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
-@property(weak, nonatomic) IBOutlet MKMapView *mapView;
+@property(weak, nonatomic) MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
@@ -133,17 +136,24 @@
     return _visibleMapArea = self.mapView.visibleMapRect;
 }
 
-- (void)setMapView:(MKMapView *)mapView
+- (MKMapView *)mapView
 {
     // Configure the map view upon setting it.
 
-    _mapView = mapView;
+    if (!_mapView)
+    {
+        _mapView = [MapViewSharedController sharedInstance].mapView;
 
-    [self askForLocationPermission];
+        _mapView.showsPointsOfInterest = NO;
+    }
 
-    _mapView.showsPointsOfInterest = NO;
+
+    [self requestLocationPermissionOnIOS8];
+
     _mapView.showsUserLocation = YES;
     _mapView.userTrackingMode = MKUserTrackingModeFollow;
+
+    return _mapView;
 }
 
 #pragma mark - ACCESSORS FOR PUBLIC PROPERTIES
@@ -168,7 +178,14 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
+
+    [self.view addSubview:self.mapView];
+
+    self.mapView.frame = self.view.bounds;
+    self.mapView.delegate = self;
+
+    self.navigationController.navigationBarHidden = NO;
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleOverpassData:)
                                                  name:gOverpassDataFetchedNotification
@@ -190,7 +207,8 @@
 
 - (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated
 {
-    // User has moved the map, remove the "old" annotations to improve performance.
+    // User has moved the map, remove the "old" annotations to improve
+    // performance.
     [self removeAllMapAnnotations];
 }
 
@@ -230,10 +248,11 @@
     return annotationView;
 }
 
-- (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control {
-
-    [self performSegueWithIdentifier:@"amenityInfoSegue" sender:self];
-
+- (void)mapView:(MKMapView *)mapView
+                   annotationView:(MKAnnotationView *)view
+    calloutAccessoryControlTapped:(UIControl *)control
+{
+    [self performSegueWithIdentifier:@"toAmenityInfo" sender:self];
 }
 
 #pragma mark - CLLocationManagerDelegate
@@ -255,7 +274,7 @@
     }
     else if (status == kCLAuthorizationStatusNotDetermined)
     {
-        [self askForLocationPermission];
+        [self requestLocationPermissionOnIOS8];
     }
 
 #if DEBUG
@@ -288,7 +307,7 @@
 
 #pragma mark - UTILITY METHODS
 
-- (void)askForLocationPermission
+- (void)requestLocationPermissionOnIOS8
 {
     // iOS 7 doesn't have this selector, let's check.
     if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
@@ -313,7 +332,8 @@
 - (void)fetchOverpassData
 {
     // User has set a new amenity type or has moved the map,
-    // we're going to fetch new data, remove the "old" annotations to improve performance.
+    // we're going to fetch new data, remove the "old" annotations to improve
+    // performance.
     [self removeAllMapAnnotations];
 
     self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
@@ -388,7 +408,8 @@
     NSArray *currentAnnotations = [self.mapView.annotations copy];
 
     // This code causes UI operations to be executed, so it must be run on the
-    // main queue to avoid conflicts accessing the annotations, and thus the error:
+    // main queue to avoid conflicts accessing the annotations, and thus the
+    // error:
     // "Collection was mutated while being enumerated".
     dispatch_async(dispatch_get_main_queue(), ^{
 
