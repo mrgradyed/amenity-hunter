@@ -27,7 +27,7 @@
 
 @interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
-@property(weak, nonatomic) MKMapView *mapView;
+@property(strong, nonatomic) MKMapView *mapView;
 @property(strong, nonatomic) CLLocationManager *locationManager;
 @property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
 @property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
@@ -138,20 +138,22 @@
 
 - (MKMapView *)mapView
 {
-    // Configure the map view upon setting it.
-
     if (!_mapView)
     {
+        // Use the shared mapview instance.
         _mapView = [MapViewSharedController sharedInstance].mapView;
 
+        _mapView.delegate = self;
         _mapView.showsPointsOfInterest = NO;
+
+        if (!_mapView.showsUserLocation)
+        {
+            [self requestLocationPermissionOnIOS8];
+
+            _mapView.showsUserLocation = YES;
+            _mapView.userTrackingMode = MKUserTrackingModeFollow;
+        }
     }
-
-
-    [self requestLocationPermissionOnIOS8];
-
-    _mapView.showsUserLocation = YES;
-    _mapView.userTrackingMode = MKUserTrackingModeFollow;
 
     return _mapView;
 }
@@ -180,9 +182,7 @@
     // Do any additional setup after loading the view.
 
     [self.view addSubview:self.mapView];
-
     self.mapView.frame = self.view.bounds;
-    self.mapView.delegate = self;
 
     self.navigationController.navigationBarHidden = NO;
 
@@ -345,7 +345,7 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-    NSLog(@"%@", notification.userInfo);
+    //  NSLog(@"%@", notification.userInfo);
 
     // New valid data acquired. Reset refetches counter.
     self.refetches = 0;
