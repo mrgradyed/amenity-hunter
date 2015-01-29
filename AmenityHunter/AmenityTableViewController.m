@@ -23,6 +23,7 @@
 
 @property(nonatomic, strong) NSArray *amenityCategories;
 @property(nonatomic, strong) NSArray *amenityTypes;
+@property(nonatomic, strong) NSString *selectedAmenity;
 
 @end
 
@@ -123,18 +124,16 @@
     return self.amenityCategories[section];
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableView:(UITableView *)tableView didHighlightRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *selectedAmenity = self.amenityTypes[indexPath.section][indexPath.row];
-
-    [self setAmenityForMapController:selectedAmenity];
+    self.selectedAmenity = self.amenityTypes[indexPath.section][indexPath.row];
 }
 
-#pragma mark - UTILITY METHODS
+#pragma mark - SEGUES
 
-- (void)setAmenityForMapController:(NSString *)selectedAmenity
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    id detailViewController = [self.splitViewController.viewControllers lastObject];
+    id detailViewController = segue.destinationViewController;
 
     if ([detailViewController isKindOfClass:[UINavigationController class]])
     {
@@ -143,7 +142,7 @@
 
     if ([detailViewController isKindOfClass:[AmenityMapViewController class]])
     {
-        ((AmenityMapViewController *)detailViewController).selectedAmenityType = selectedAmenity;
+        ((AmenityMapViewController *)detailViewController).selectedAmenityType = self.selectedAmenity;
     }
 }
 
