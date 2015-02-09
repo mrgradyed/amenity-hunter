@@ -35,7 +35,13 @@
 {
     if (!_amenityCategories)
     {
-        _amenityCategories = @[ @"Sustenance", @"Transportation", @"Financial", @"Entertainment", @"Others" ];
+        _amenityCategories = @[
+            NSLocalizedString(@"Sustenance", nil),
+            NSLocalizedString(@"Transportation", nil),
+            NSLocalizedString(@"Financial", nil),
+            NSLocalizedString(@"Entertainment", nil),
+            NSLocalizedString(@"Others", nil)
+        ];
     }
 
     return _amenityCategories;
@@ -47,8 +53,7 @@
     {
         NSArray *sustenanceAmenities = @[ @"bar", @"cafe", @"fast_food", @"ice_cream", @"pub", @"restaurant" ];
 
-        NSArray *transportationAmenities =
-            @[ @"bicycle_rental", @"bus_stop", @"car_rental", @"fuel", @"parking", @"taxi" ];
+        NSArray *transportationAmenities = @[ @"bicycle_rental", @"car_rental", @"fuel", @"parking", @"taxi" ];
 
         NSArray *financialAmenities = @[ @"atm", @"bank" ];
 
@@ -77,12 +82,7 @@
     self.navigationController.navigationBarHidden = YES;
 
     // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-
-    // Uncomment the following line to display an Edit button in the navigation
-    // bar for this view
-    // controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.clearsSelectionOnViewWillAppear = YES;
 }
 
 - (void)didReceiveMemoryWarning
@@ -114,7 +114,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"AmenityTableCell" forIndexPath:indexPath];
 
     // Configure the cell...
-    cell.textLabel.text = self.amenityTypes[indexPath.section][indexPath.row];
+    cell.textLabel.text = NSLocalizedString(self.amenityTypes[indexPath.section][indexPath.row], nil);
 
     return cell;
 }
