@@ -17,7 +17,7 @@
 //
 
 #import "SharedOverpassAPI.h"
-#import "NetworkIndicatorSharedManager.h"
+#import "SharedNetworkIndicatorManager.h"
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 NSString *const gOverpassFetchingFailedNotification = @"OverpassFetchingFailedNotification";
@@ -195,7 +195,7 @@ static int const overpassServerTimeout = 5;
         downloadTaskWithRequest:request
               completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
 
-                  [[NetworkIndicatorSharedManager sharedInstance] networkActivityDidStop];
+                  [[SharedNetworkIndicatorManager sharedInstance] networkActivityDidStop];
 
                   if (!error)
                   {
@@ -252,7 +252,7 @@ static int const overpassServerTimeout = 5;
 
     [downloadTask resume];
 
-    [[NetworkIndicatorSharedManager sharedInstance] networkActivityDidStart];
+    [[SharedNetworkIndicatorManager sharedInstance] networkActivityDidStart];
 }
 
 - (void)notifyTaskFailed

@@ -20,7 +20,8 @@
 #import "SharedOverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
-#import "MapViewSharedManager.h"
+#import "SharedMapViewSharedManager.h"
+#import "SharedLocationManager.h"
 
 @import MapKit;
 @import CoreLocation;
@@ -28,9 +29,7 @@
 @interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
 @property(strong, nonatomic) MKMapView *mapView;
-@property(strong, nonatomic) CLLocationManager *locationManager;
-@property(strong, nonatomic) UIAlertView *locationDeniedAlertView;
-@property(strong, nonatomic) UIAlertController *locationDeniedAlertController;
+@property(strong, nonatomic) SharedLocationManager *sharedLocationManager;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 @property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
 @property(strong, nonatomic) OverpassBBox *maxBoundingBox;
@@ -42,66 +41,6 @@
 @implementation AmenityMapViewController
 
 #pragma mark - ACCESSORS
-
-- (CLLocationManager *)locationManager
-{
-    if (!_locationManager)
-    {
-        _locationManager = [[CLLocationManager alloc] init];
-
-        _locationManager.delegate = self;
-    }
-
-    return _locationManager;
-}
-
-- (UIAlertView *)locationDeniedAlertView
-{
-    if (!_locationDeniedAlertView)
-    {
-        // UIAlertView is deprecated in iOS 8. We should use UIAlertController.
-        _locationDeniedAlertView = [[UIAlertView alloc] initWithTitle:@"Location Settings"
-                                                              message:@"Amenity Hunter cannot access your location."
-                                                              @"Your location is needed to show amenities near you."
-                                                             delegate:self
-                                                    cancelButtonTitle:@"OK"
-                                                    otherButtonTitles:nil];
-    }
-
-    return _locationDeniedAlertView;
-}
-
-- (UIAlertController *)locationDeniedAlertController
-{
-    if (!_locationDeniedAlertController)
-    {
-        _locationDeniedAlertController =
-            [UIAlertController alertControllerWithTitle:@"Location Settings"
-                                                message:@"Amenity Hunter cannot access your location."
-                                                @"Your location is needed to show amenities near you."
-                                         preferredStyle:UIAlertControllerStyleAlert];
-
-        UIAlertAction *canceButton =
-            [UIAlertAction actionWithTitle:@"Continue anyway" style:UIAlertActionStyleCancel handler:nil];
-
-        UIAlertAction *settingsButton =
-            [UIAlertAction actionWithTitle:@"Change location settings"
-                                     style:UIAlertActionStyleDefault
-                                   handler:^(UIAlertAction *action) {
-
-                                       // UIApplicationOpenSettingsURLString is iOS 8.0 and later
-                                       // ONLY.
-                                       NSURL *settingsURL = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-
-                                       [[UIApplication sharedApplication] openURL:settingsURL];
-                                   }];
-
-        [_locationDeniedAlertController addAction:canceButton];
-        [_locationDeniedAlertController addAction:settingsButton];
-    }
-
-    return _locationDeniedAlertController;
-}
 
 - (NSMutableArray *)mapAmenityAnnotations
 {
@@ -138,24 +77,12 @@
 
 - (MKMapView *)mapView
 {
-    if (!_mapView)
-    {
-        // Use the shared mapview instance.
-        _mapView = [MapViewSharedController sharedInstance].mapView;
+    return _mapView = [SharedMapViewSharedManager sharedInstance].mapView;
+}
 
-        _mapView.delegate = self;
-        _mapView.showsPointsOfInterest = NO;
-
-        if (!_mapView.showsUserLocation)
-        {
-            [self requestLocationPermissionOnIOS8];
-
-            _mapView.showsUserLocation = YES;
-            _mapView.userTrackingMode = MKUserTrackingModeFollow;
-        }
-    }
-
-    return _mapView;
+- (SharedLocationManager *)sharedLocationManager
+{
+    return _sharedLocationManager = [SharedLocationManager sharedInstance];
 }
 
 #pragma mark - ACCESSORS FOR PUBLIC PROPERTIES
@@ -181,6 +108,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 
+    self.mapView.delegate = self;
     [self.view addSubview:self.mapView];
     self.mapView.frame = self.view.bounds;
 
@@ -264,17 +192,22 @@
         if ([UIAlertController class])
         {
             // iOS 8 and higher.
-            [self presentViewController:self.locationDeniedAlertController animated:YES completion:nil];
+            [self presentViewController:[self.sharedLocationManager locationDeniedAlertControllerForIOS8]
+                               animated:YES
+                             completion:nil];
         }
         else
         {
             // iOS 7 and lower.
-            [self.locationDeniedAlertView show];
+            UIAlertView *locationDeniedAlertViewForIOS7 = [self.sharedLocationManager locationDeniedAlertViewForIOS7];
+
+            locationDeniedAlertViewForIOS7.delegate = self;
+            [locationDeniedAlertViewForIOS7 show];
         }
     }
     else if (status == kCLAuthorizationStatusNotDetermined)
     {
-        [self requestLocationPermissionOnIOS8];
+        [self.sharedLocationManager requestLocationPermissionOnIOS8];
     }
 
 #if DEBUG
@@ -306,28 +239,6 @@
 }
 
 #pragma mark - UTILITY METHODS
-
-- (void)requestLocationPermissionOnIOS8
-{
-    // iOS 7 doesn't have this selector, let's check.
-    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])
-    {
-        // Apple docs: this method runs asynchronously and prompts the user to grant
-        // permission
-        // to the app to use location services. The user prompt contains the text
-        // from the
-        // NSLocationWhenInUseUsageDescription key in your app’s Info.plist file,
-        // and the presence
-        // of that key is required when calling this method.
-        // If the current authorization status is anything other than
-        // kCLAuthorizationStatusNotDetermined, this method does nothing and does
-        // not call the
-        // locationManager:didChangeAuthorizationStatus: method.
-
-        // iOS 8.0 and later ONLY.
-        [self.locationManager requestWhenInUseAuthorization];
-    }
-}
 
 - (void)fetchOverpassData
 {
@@ -409,8 +320,7 @@
 
     // This code causes UI operations to be executed, so it must be run on the
     // main queue to avoid conflicts accessing the annotations, and thus the
-    // error:
-    // "Collection was mutated while being enumerated".
+    // error: "Collection was mutated while being enumerated".
     dispatch_async(dispatch_get_main_queue(), ^{
 
         [self.mapView removeAnnotations:currentAnnotations];

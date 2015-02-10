@@ -1,5 +1,5 @@
 //
-//  NetworIndicatorSharedController.m
+//  MapViewSharedController.m
 //  AmenityHunter
 //
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -12,43 +12,21 @@
 //  THE
 //  SOFTWARE.
 //
-//  Created by emi on 11/12/14.
+//  Created by emi on 28/01/15.
 //
-//
 
-#import "NetworkIndicatorSharedManager.h"
+@import MapKit;
 
-@import UIKit;
+#import "SharedLocationManager.h"
+#import "SharedMapViewSharedManager.h"
 
-@implementation NetworkIndicatorSharedManager
+@interface SharedMapViewSharedManager ()
 
-#pragma mark - ACCESSORS
+@property(nonatomic, strong) MKMapView *mapView;
 
-- (void)setNetworkActivitiesCount:(NSInteger)networkActivitiesCount
-{
-    _networkActivitiesCount = networkActivitiesCount;
+@end
 
-    if (_networkActivitiesCount > 0)
-    {
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    }
-    else
-    {
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    }
-}
-
-#pragma mark - UTILITY METHODS
-
-- (void)networkActivityDidStart
-{
-    self.networkActivitiesCount++;
-}
-
-- (void)networkActivityDidStop
-{
-    self.networkActivitiesCount--;
-}
+@implementation SharedMapViewSharedManager
 
 #pragma mark - CLASS METHODS
 
@@ -59,16 +37,16 @@
     // The static variable which will hold the single and only instance of this
     // class.
 
-    static NetworkIndicatorSharedManager *sharedNetworkIndicatorController;
+    static SharedMapViewSharedManager *sharedMapView;
 
     static dispatch_once_t blockHasCompleted;
 
     // Create an instance of this class once and only once for the lifetime of the
     // application.
 
-    dispatch_once(&blockHasCompleted, ^{ sharedNetworkIndicatorController = [[self alloc] initActually]; });
+    dispatch_once(&blockHasCompleted, ^{ sharedMapView = [[self alloc] initActually]; });
 
-    return sharedNetworkIndicatorController;
+    return sharedMapView;
 }
 
 #pragma mark - INIT
@@ -79,9 +57,8 @@
     // instead of creating a singleton by using the class method.
 
     @throw [NSException exceptionWithName:@"SingletonException"
-                                   reason:@"Please use: [NetworkIndicatorSharedController " @"sharedInstance] instead."
+                                   reason:@"Please use: [MapViewSharedController " @"sharedInstance] instead."
                                  userInfo:nil];
-
     return nil;
 }
 
@@ -94,7 +71,14 @@
 
     if (self)
     {
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        _mapView = [[MKMapView alloc] init];
+        _mapView.showsPointsOfInterest = NO;
+        _mapView.showsBuildings = YES;
+
+        [[SharedLocationManager sharedInstance] requestLocationPermissionOnIOS8];
+
+        _mapView.showsUserLocation = YES;
+        _mapView.userTrackingMode = MKUserTrackingModeFollow;
     }
 
     return self;

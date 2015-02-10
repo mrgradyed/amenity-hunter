@@ -1,5 +1,5 @@
 //
-//  NetworIndicatorSharedController.h
+//  SharedLocationManager.h
 //  AmenityHunter
 //
 //  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -12,24 +12,27 @@
 //  THE
 //  SOFTWARE.
 //
-//  Created by emi on 11/12/14.
+//  Created by emi on 10/02/15.
 //
-//
 
-#import <Foundation/Foundation.h>
+@import UIKit;
 
-@interface NetworkIndicatorSharedManager : NSObject
+@interface SharedLocationManager : NSObject
 
-#pragma mark - PUBLIC PROPERTIES
+#pragma mark - PROPERTIES
 
-@property(nonatomic) NSInteger networkActivitiesCount;
+@property(nonatomic, strong, readonly) CLLocationManager *locationManager;
 
-#pragma mark - PUBLIC METHODS
-
-- (void)networkActivityDidStart;
-
-- (void)networkActivityDidStop;
+#pragma mark - CLASS METHODS
 
 + (instancetype)sharedInstance;
+
+#pragma mark - INSTANCE METHODS
+
+- (UIAlertView *)locationDeniedAlertViewForIOS7;
+
+- (UIAlertController *)locationDeniedAlertControllerForIOS8;
+
+- (void)requestLocationPermissionOnIOS8;
 
 @end

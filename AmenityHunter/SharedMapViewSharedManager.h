@@ -17,7 +17,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MapViewSharedManager : NSObject
+@interface SharedMapViewSharedManager : NSObject
 
 #pragma mark - PROPERTIES
 
