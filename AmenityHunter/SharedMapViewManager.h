@@ -17,7 +17,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface SharedMapViewSharedManager : NSObject
+@interface SharedMapViewManager : NSObject
 
 #pragma mark - PROPERTIES
 
@@ -26,5 +26,15 @@
 #pragma mark - CLASS METHODS
 
 + (instancetype)sharedInstance;
+
+#pragma mark - PUBLIC UTLITY METHODS
+
+- (void)refreshMapWithNewAnnotations:(NSArray *)newAnnotations;
+
+- (void)removeAllMapAnnotations;
+
+- (OverpassBBox *)overpassBBoxFromVisibleMapArea;
+
+- (void)reduceRegionIfBiggerThanMaxRegion;
 
 @end

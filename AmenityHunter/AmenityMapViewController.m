@@ -20,7 +20,7 @@
 #import "SharedOverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
-#import "SharedMapViewSharedManager.h"
+#import "SharedMapViewManager.h"
 #import "SharedLocationManager.h"
 
 @import MapKit;
@@ -28,12 +28,10 @@
 
 @interface AmenityMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate, UIAlertViewDelegate>
 
-@property(strong, nonatomic) MKMapView *mapView;
+@property(strong, nonatomic) SharedMapViewManager *sharedMapViewManager;
 @property(strong, nonatomic) SharedLocationManager *sharedLocationManager;
 @property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 @property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
-@property(strong, nonatomic) OverpassBBox *maxBoundingBox;
-@property(nonatomic) MKMapRect visibleMapArea;
 @property(nonatomic) NSInteger refetches;
 
 @end
@@ -57,27 +55,9 @@
     return _overpassAPIsharedInstance = [SharedOverpassAPI sharedInstance];
 }
 
-- (OverpassBBox *)maxBoundingBox
+- (SharedMapViewManager *)sharedMapViewManager
 {
-    if (!_maxBoundingBox)
-    {
-        _maxBoundingBox = [[OverpassBBox alloc] initWithLowestLatitude:0.0
-                                                       lowestLongitude:0.0
-                                                       highestLatitude:0.5
-                                                      highestLongitude:0.5];
-    }
-
-    return _maxBoundingBox;
-}
-
-- (MKMapRect)visibleMapArea
-{
-    return _visibleMapArea = self.mapView.visibleMapRect;
-}
-
-- (MKMapView *)mapView
-{
-    return _mapView = [SharedMapViewSharedManager sharedInstance].mapView;
+    return _sharedMapViewManager = [SharedMapViewManager sharedInstance];
 }
 
 - (SharedLocationManager *)sharedLocationManager
@@ -96,7 +76,7 @@
 
     _selectedAmenityType = selectedAmenityType;
 
-    [self reduceRegionIfBiggerThanMaxRegion];
+    [self.sharedMapViewManager reduceRegionIfBiggerThanMaxRegion];
 
     [self fetchOverpassData];
 }
@@ -108,9 +88,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 
-    self.mapView.delegate = self;
-    [self.view addSubview:self.mapView];
-    self.mapView.frame = self.view.bounds;
+    self.sharedMapViewManager.mapView.delegate = self;
+    [self.view addSubview:self.sharedMapViewManager.mapView];
+    self.sharedMapViewManager.mapView.frame = self.view.bounds;
 
     self.navigationController.navigationBarHidden = NO;
 
@@ -137,14 +117,14 @@
 {
     // User has moved the map, remove the "old" annotations to improve
     // performance.
-    [self removeAllMapAnnotations];
+    [self.sharedMapViewManager removeAllMapAnnotations];
 }
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated
 {
     if (self.selectedAmenityType)
     {
-        [self reduceRegionIfBiggerThanMaxRegion];
+        [self.sharedMapViewManager reduceRegionIfBiggerThanMaxRegion];
 
         [self fetchOverpassData];
     }
@@ -243,12 +223,10 @@
 - (void)fetchOverpassData
 {
     // User has set a new amenity type or has moved the map,
-    // we're going to fetch new data, remove the "old" annotations to improve
-    // performance.
-    [self removeAllMapAnnotations];
+    // we're going to fetch new data, remove the "old" annotations to improve performance.
+    [self.sharedMapViewManager removeAllMapAnnotations];
 
-    self.overpassAPIsharedInstance.boundingBox = [self overpassBBoxFromVisibleMapArea];
-
+    self.overpassAPIsharedInstance.boundingBox = [self.sharedMapViewManager overpassBBoxFromVisibleMapArea];
     self.overpassAPIsharedInstance.amenityType = self.selectedAmenityType;
 
     [self.overpassAPIsharedInstance startFetchingAmenitiesData];
@@ -256,12 +234,13 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-    //  NSLog(@"%@", notification.userInfo);
+    NSLog(@"%@", notification.userInfo);
 
     // New valid data acquired. Reset refetches counter.
     self.refetches = 0;
 
-    [self removeAllMapAnnotations];
+    // Remove old annotations references.
+    self.mapAmenityAnnotations = nil;
 
     id elements = [notification.userInfo valueForKey:@"elements"];
 
@@ -295,7 +274,7 @@
         [self.mapAmenityAnnotations addObject:annotation];
     }
 
-    [self refreshMapAnnotations];
+    [self.sharedMapViewManager refreshMapWithNewAnnotations:self.mapAmenityAnnotations];
 }
 
 - (void)handleFetchingFailure
@@ -311,70 +290,6 @@
 #if DEBUG
         NSLog(@"Fetching failed. Refetch n.%ld", (long)self.refetches);
 #endif
-    }
-}
-
-- (void)refreshMapAnnotations
-{
-    NSArray *currentAnnotations = [self.mapView.annotations copy];
-
-    // This code causes UI operations to be executed, so it must be run on the
-    // main queue to avoid conflicts accessing the annotations, and thus the
-    // error: "Collection was mutated while being enumerated".
-    dispatch_async(dispatch_get_main_queue(), ^{
-
-        [self.mapView removeAnnotations:currentAnnotations];
-
-        [self.mapView addAnnotations:self.mapAmenityAnnotations];
-
-    });
-}
-
-- (void)removeAllMapAnnotations
-{
-    self.mapAmenityAnnotations = nil;
-
-    NSArray *currentAnnotations = [self.mapView.annotations copy];
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-
-        [self.mapView removeAnnotations:currentAnnotations];
-
-    });
-}
-
-- (OverpassBBox *)overpassBBoxFromVisibleMapArea
-{
-    MKMapPoint bottomLeftCorner =
-        MKMapPointMake(MKMapRectGetMinX(self.visibleMapArea), MKMapRectGetMaxY(self.visibleMapArea));
-
-    MKMapPoint topRightCorner =
-        MKMapPointMake(MKMapRectGetMaxX(self.visibleMapArea), MKMapRectGetMinY(self.visibleMapArea));
-
-    CLLocationCoordinate2D bottomLeftCornerCoordinates = MKCoordinateForMapPoint(bottomLeftCorner);
-    CLLocationCoordinate2D topRightCornerCoordinates = MKCoordinateForMapPoint(topRightCorner);
-
-    // Rounding to tolerate very small map pannings.
-    double lowestLatitude = floor(bottomLeftCornerCoordinates.latitude * 1000) / 1000;
-    double lowestLongitude = floor(bottomLeftCornerCoordinates.longitude * 1000) / 1000;
-    double highestLatitude = ceil(topRightCornerCoordinates.latitude * 1000) / 1000;
-    double highestLongitude = ceil(topRightCornerCoordinates.longitude * 1000) / 1000;
-
-    return [[OverpassBBox alloc] initWithLowestLatitude:lowestLatitude
-                                        lowestLongitude:lowestLongitude
-                                        highestLatitude:highestLatitude
-                                       highestLongitude:highestLongitude];
-}
-
-- (void)reduceRegionIfBiggerThanMaxRegion
-{
-    OverpassBBox *currentBBOX = [self overpassBBoxFromVisibleMapArea];
-
-    if ([currentBBOX compare:self.maxBoundingBox] == NSOrderedDescending)
-    {
-        MKCoordinateRegion maxRegion = MKCoordinateRegionMake(self.mapView.centerCoordinate, self.maxBoundingBox.span);
-
-        [self.mapView setRegion:maxRegion animated:YES];
     }
 }
 

@@ -121,11 +121,10 @@
 {
     if ((lowestLatitude > highestLatitude) || (lowestLongitude > highestLongitude))
     {
-        @throw
-            [NSException exceptionWithName:@"InvalidCoordinatesException"
-                                    reason:@"lowestLatitude must be lower than highestLatitude and "
-                                    @"lowestLongitude must be lower than highestLongitude"
-                                  userInfo:nil];
+        @throw [NSException exceptionWithName:@"InvalidCoordinatesException"
+                                       reason:@"lowestLatitude must be lower than highestLatitude and "
+                                       @"lowestLongitude must be lower than highestLongitude"
+                                     userInfo:nil];
     }
 
     self = [super init];
@@ -147,10 +146,7 @@
 
     if (self)
     {
-        self = [self initWithLowestLatitude:-0.1
-                            lowestLongitude:-0.1
-                            highestLatitude:0.1
-                           highestLongitude:0.1];
+        self = [self initWithLowestLatitude:-0.1 lowestLongitude:-0.1 highestLatitude:0.1 highestLongitude:0.1];
     }
 
     return self;
@@ -170,11 +166,16 @@
 {
     // This method converts the BBox to a string usable in the OverpassQL queries.
 
-    NSString *overpassString =
-        [NSString stringWithFormat:@"(%f,%f,%f,%f)", self.lowestLatitude, self.lowestLongitude,
-                                   self.highestLatitude, self.highestLongitude];
+    NSString *overpassString = [NSString stringWithFormat:@"(%f,%f,%f,%f)", self.lowestLatitude, self.lowestLongitude,
+                                                          self.highestLatitude, self.highestLongitude];
 
     return overpassString;
+}
+
++ (OverpassBBox *)maxBoundingBox
+{
+    return
+        [[OverpassBBox alloc] initWithLowestLatitude:0.0 lowestLongitude:0.0 highestLatitude:0.5 highestLongitude:0.5];
 }
 
 #pragma mark - Equality and Comparison
@@ -188,11 +189,11 @@
 
     OverpassBBox *otherBBOX = (OverpassBBox *)object;
 
-    BOOL isLatitudeEqual = (self.lowestLatitude == otherBBOX.lowestLatitude) &&
-                           (self.highestLatitude == otherBBOX.highestLatitude);
+    BOOL isLatitudeEqual =
+        (self.lowestLatitude == otherBBOX.lowestLatitude) && (self.highestLatitude == otherBBOX.highestLatitude);
 
-    BOOL isLongitudeEqual = (self.lowestLongitude == otherBBOX.lowestLongitude) &&
-                            (self.highestLongitude == otherBBOX.highestLongitude);
+    BOOL isLongitudeEqual =
+        (self.lowestLongitude == otherBBOX.lowestLongitude) && (self.highestLongitude == otherBBOX.highestLongitude);
 
     return isLatitudeEqual && isLongitudeEqual;
 }

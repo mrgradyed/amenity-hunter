@@ -67,4 +67,6 @@
 
 - (NSComparisonResult)compare:(OverpassBBox *)otherBBOX;
 
++ (OverpassBBox *)maxBoundingBox;
+
 @end
