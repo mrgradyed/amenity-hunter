@@ -64,10 +64,11 @@
 {
     // Return an exception if someone try to use the default init
     // instead of creating a singleton by using the class method.
+    NSString *exceptionString =
+        [NSString stringWithFormat:@"Please use: [%@ sharedInstance] instead.", NSStringFromClass([self class])];
 
-    @throw [NSException exceptionWithName:@"SingletonException"
-                                   reason:@"Please use: [MapViewSharedController " @"sharedInstance] instead."
-                                 userInfo:nil];
+    @throw [NSException exceptionWithName:@"SingletonException" reason:exceptionString userInfo:nil];
+
     return nil;
 }
 
