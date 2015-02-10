@@ -6,19 +6,21 @@
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE
 //  SOFTWARE.
 //
 //  Created by emi on 11/12/14.
 //
 //
 
-#import "NetworkIndicatorSharedController.h"
+#import "NetworkIndicatorSharedManager.h"
 
 @import UIKit;
 
-@implementation NetworkIndicatorSharedController
+@implementation NetworkIndicatorSharedManager
 
 #pragma mark - ACCESSORS
 
@@ -38,9 +40,15 @@
 
 #pragma mark - UTILITY METHODS
 
-- (void)networkActivityDidStart { self.networkActivitiesCount++; }
+- (void)networkActivityDidStart
+{
+    self.networkActivitiesCount++;
+}
 
-- (void)networkActivityDidStop { self.networkActivitiesCount--; }
+- (void)networkActivityDidStop
+{
+    self.networkActivitiesCount--;
+}
 
 #pragma mark - CLASS METHODS
 
@@ -51,15 +59,14 @@
     // The static variable which will hold the single and only instance of this
     // class.
 
-    static NetworkIndicatorSharedController *sharedNetworkIndicatorController;
+    static NetworkIndicatorSharedManager *sharedNetworkIndicatorController;
 
     static dispatch_once_t blockHasCompleted;
 
     // Create an instance of this class once and only once for the lifetime of the
     // application.
 
-    dispatch_once(&blockHasCompleted,
-                  ^{ sharedNetworkIndicatorController = [[self alloc] initActually]; });
+    dispatch_once(&blockHasCompleted, ^{ sharedNetworkIndicatorController = [[self alloc] initActually]; });
 
     return sharedNetworkIndicatorController;
 }
@@ -72,8 +79,7 @@
     // instead of creating a singleton by using the class method.
 
     @throw [NSException exceptionWithName:@"SingletonException"
-                                   reason:@"Please use: [NetworkIndicatorSharedController "
-                                   @"sharedInstance] instead."
+                                   reason:@"Please use: [NetworkIndicatorSharedController " @"sharedInstance] instead."
                                  userInfo:nil];
 
     return nil;

@@ -6,8 +6,10 @@
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE
 //  SOFTWARE.
 //
 //  Created by emi on 07/11/14.
@@ -15,7 +17,7 @@
 //
 
 #import "SharedOverpassAPI.h"
-#import "NetworkIndicatorSharedController.h"
+#import "NetworkIndicatorSharedManager.h"
 
 NSString *const gOverpassDataFetchedNotification = @"OverpassDataFetchedNotification";
 NSString *const gOverpassFetchingFailedNotification = @"OverpassFetchingFailedNotification";
@@ -114,8 +116,7 @@ static int const overpassServerTimeout = 5;
 
     if (self)
     {
-        NSURLSessionConfiguration *sessionConfiguration =
-            [NSURLSessionConfiguration ephemeralSessionConfiguration];
+        NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
 
         // Client timeout will be a little bit more than the server's one.
         sessionConfiguration.timeoutIntervalForResource = overpassServerTimeout + 2;
@@ -136,10 +137,9 @@ static int const overpassServerTimeout = 5;
     }
 
     // The request for fetching data via the Overpass API.
-    NSString *requestString =
-        [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",
-                                   overpassEndpoint, overpassFormat, overpassServerTimeout,
-                                   self.amenityType, [self.boundingBox overpassString]];
+    NSString *requestString = [NSString stringWithFormat:@"%@[out:%@][timeout:%d];node[\"amenity\"=\"%@\"]%@;out body;",
+                                                         overpassEndpoint, overpassFormat, overpassServerTimeout,
+                                                         self.amenityType, [self.boundingBox overpassString]];
 
 #if DEBUG
     NSLog(@"REQUEST URL:%@\n\n", requestString);
@@ -166,29 +166,27 @@ static int const overpassServerTimeout = 5;
     // and we are interested in getting the data just for the new current region.
     // The not completed
     // tasks for retrieving old regions' data can be cancelled.
-    [self.ephemeralSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks,
-                                                           NSArray *downloadTasks) {
+    [self.ephemeralSession
+        getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
 
-        for (NSURLSessionDownloadTask *task in downloadTasks)
-        {
-            // Check if the old task is running (or is suspended).
-            if (task.state != NSURLSessionTaskStateCompleted &&
-                task.state != NSURLSessionTaskStateCanceling)
+            for (NSURLSessionDownloadTask *task in downloadTasks)
             {
-                // Cancel the old task.
-                [task cancel];
+                // Check if the old task is running (or is suspended).
+                if (task.state != NSURLSessionTaskStateCompleted && task.state != NSURLSessionTaskStateCanceling)
+                {
+                    // Cancel the old task.
+                    [task cancel];
 
                 #if DEBUG
-                NSLog(@"CANCELING %@\n\n", task.originalRequest.URL);
+                    NSLog(@"CANCELING %@\n\n", task.originalRequest.URL);
                 #endif
+                }
             }
-        }
-    }];
+        }];
 
     // The request URL for the new task.
     NSURL *requestURL =
-        [NSURL URLWithString:[requestString
-                                 stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        [NSURL URLWithString:[requestString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 
     NSURLRequest *request = [NSURLRequest requestWithURL:requestURL];
 
@@ -197,23 +195,23 @@ static int const overpassServerTimeout = 5;
         downloadTaskWithRequest:request
               completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
 
-                  [[NetworkIndicatorSharedController sharedInstance] networkActivityDidStop];
+                  [[NetworkIndicatorSharedManager sharedInstance] networkActivityDidStop];
 
                   if (!error)
                   {
                       // Task completed!
 
                       // Put the retrieved JSON data in a dictionary.
-                      id fetchedData = [NSJSONSerialization
-                          JSONObjectWithData:[NSData dataWithContentsOfURL:location]
-                                     options:0
-                                       error:nil];
+                      id fetchedData = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:location]
+                                                                       options:0
+                                                                         error:nil];
 
                       if (![self areValidOverpassData:fetchedData])
                       {
                           // No valid data received!
 
-                          // Request succesful but no data returned. Wrong query syntax?
+                          // Request succesful but no data returned. Wrong query
+                          // syntax?
                           // Task failed. Let's notify this.
                           [self notifyTaskFailed];
 
@@ -254,16 +252,15 @@ static int const overpassServerTimeout = 5;
 
     [downloadTask resume];
 
-    [[NetworkIndicatorSharedController sharedInstance] networkActivityDidStart];
+    [[NetworkIndicatorSharedManager sharedInstance] networkActivityDidStart];
 }
 
 - (void)notifyTaskFailed
 {
     // Task failed. Let's notify this.
     [[NSNotificationCenter defaultCenter]
-        postNotification:[NSNotification notificationWithName:gOverpassFetchingFailedNotification
-                                                       object:self
-                                                     userInfo:nil]];
+        postNotification:
+            [NSNotification notificationWithName:gOverpassFetchingFailedNotification object:self userInfo:nil]];
 }
 
 - (void)cacheFetchedData:(id)fetchedData withRequest:(NSString *)request
@@ -295,7 +292,8 @@ static int const overpassServerTimeout = 5;
     NSArray *elements = [fetchedData valueForKey:@"elements"];
     id remark = [fetchedData valueForKey:@"remark"];
 
-    // If data are null or JSON data contains no elements with a server string error
+    // If data are null or JSON data contains no elements with a server string
+    // error
     // then data are invalid.
     if (!fetchedData || (!elements.count && remark))
     {

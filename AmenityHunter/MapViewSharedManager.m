@@ -6,8 +6,10 @@
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE
 //  SOFTWARE.
 //
 //  Created by emi on 28/01/15.
@@ -15,15 +17,15 @@
 
 @import MapKit;
 
-#import "MapViewSharedController.h"
+#import "MapViewSharedManager.h"
 
-@interface MapViewSharedController ()
+@interface MapViewSharedManager ()
 
 @property(nonatomic, strong) MKMapView *mapView;
 
 @end
 
-@implementation MapViewSharedController
+@implementation MapViewSharedManager
 
 #pragma mark - CLASS METHODS
 
@@ -34,7 +36,7 @@
     // The static variable which will hold the single and only instance of this
     // class.
 
-    static MapViewSharedController *sharedMapView;
+    static MapViewSharedManager *sharedMapView;
 
     static dispatch_once_t blockHasCompleted;
 
@@ -54,7 +56,7 @@
     // instead of creating a singleton by using the class method.
 
     @throw [NSException exceptionWithName:@"SingletonException"
-                                   reason:@"Please use: [MapViewSharedController sharedInstance] instead."
+                                   reason:@"Please use: [MapViewSharedController " @"sharedInstance] instead."
                                  userInfo:nil];
     return nil;
 }

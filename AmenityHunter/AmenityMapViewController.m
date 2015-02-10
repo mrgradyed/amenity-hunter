@@ -20,7 +20,7 @@
 #import "SharedOverpassAPI.h"
 #import "OverpassBBox.h"
 #import "AmenityAnnotation.h"
-#import "MapViewSharedController.h"
+#import "MapViewSharedManager.h"
 
 @import MapKit;
 @import CoreLocation;
