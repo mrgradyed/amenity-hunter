@@ -19,15 +19,26 @@
 
 #import "SharedLocationManager.h"
 
-@interface SharedLocationManager () <CLLocationManagerDelegate, UIAlertViewDelegate>
+@interface SharedLocationManager ()
 
 @property(nonatomic, strong) CLLocationManager *locationManager;
+@property(nonatomic, strong) CLGeocoder *geocoder;
 
 @end
 
 @implementation SharedLocationManager
 
 #pragma mark - ACCESSORS
+
+- (CLGeocoder *)geocoder
+{
+    if (!_geocoder)
+    {
+        _geocoder = [[CLGeocoder alloc] init];
+    }
+
+    return _geocoder;
+}
 
 + (instancetype)sharedInstance
 {

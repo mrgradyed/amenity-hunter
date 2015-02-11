@@ -22,6 +22,7 @@
 #import "AmenityAnnotation.h"
 #import "SharedMapViewManager.h"
 #import "SharedLocationManager.h"
+#import "SharedNetworkIndicatorManager.h"
 
 @import MapKit;
 @import CoreLocation;
@@ -30,8 +31,9 @@
 
 @property(strong, nonatomic) SharedMapViewManager *sharedMapViewManager;
 @property(strong, nonatomic) SharedLocationManager *sharedLocationManager;
-@property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
+@property(strong, nonatomic) SharedNetworkIndicatorManager *sharedNetworkIndicatorManager;
 @property(strong, nonatomic) SharedOverpassAPI *overpassAPIsharedInstance;
+@property(strong, nonatomic) NSMutableArray *mapAmenityAnnotations;
 @property(nonatomic) NSInteger refetches;
 
 @end
@@ -63,6 +65,11 @@
 - (SharedLocationManager *)sharedLocationManager
 {
     return _sharedLocationManager = [SharedLocationManager sharedInstance];
+}
+
+- (SharedNetworkIndicatorManager *)sharedNetworkIndicatorManager
+{
+    return _sharedNetworkIndicatorManager = [SharedNetworkIndicatorManager sharedInstance];
 }
 
 #pragma mark - ACCESSORS FOR PUBLIC PROPERTIES
@@ -156,11 +163,9 @@
     return annotationView;
 }
 
-- (void)mapView:(MKMapView *)mapView
-                   annotationView:(MKAnnotationView *)view
-    calloutAccessoryControlTapped:(UIControl *)control
+- (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
-    [self performSegueWithIdentifier:@"toAmenityInfo" sender:self];
+    [self reverseGeocodeAnnotation:view.annotation];
 }
 
 #pragma mark - CLLocationManagerDelegate
@@ -234,7 +239,7 @@
 
 - (void)handleOverpassData:(NSNotification *)notification
 {
-    NSLog(@"%@", notification.userInfo);
+    // NSLog(@"%@", notification.userInfo);
 
     // New valid data acquired. Reset refetches counter.
     self.refetches = 0;
@@ -262,14 +267,8 @@
         annotation = [[AmenityAnnotation alloc] initWithLatitude:[elementLatitude doubleValue]
                                                        Longitude:[elementLongitude doubleValue]];
 
-        annotation.title = elementName;
-        annotation.subtitle = elementType;
-
-        if (!elementName)
-        {
-            annotation.title = elementType;
-            annotation.subtitle = nil;
-        }
+        annotation.title = elementName ? elementName : elementType;
+        annotation.subtitle = elementName ? elementType : nil;
 
         [self.mapAmenityAnnotations addObject:annotation];
     }
@@ -291,6 +290,45 @@
         NSLog(@"Fetching failed. Refetch n.%ld", (long)self.refetches);
 #endif
     }
+}
+
+- (void)reverseGeocodeAnnotation:(MKPointAnnotation *)annotation
+{
+    [self.sharedNetworkIndicatorManager networkActivityDidStart];
+
+    CLLocation *location3D = [[CLLocation alloc] initWithCoordinate:annotation.coordinate
+                                                           altitude:0
+                                                 horizontalAccuracy:1
+                                                   verticalAccuracy:-1
+                                                          timestamp:nil];
+
+    [self.sharedLocationManager.geocoder
+        reverseGeocodeLocation:location3D
+             completionHandler:^(NSArray *placemarks, NSError *error) {
+
+                 [self.sharedNetworkIndicatorManager networkActivityDidStop];
+
+                 if (!error)
+                 {
+                     NSString *city, *street = @"";
+
+                     CLPlacemark *placemark = [placemarks lastObject];
+
+                     if (placemark.locality)
+                     {
+                         city = [@"" stringByAppendingFormat:@"%@", placemark.locality];
+                     }
+
+                     if (placemark.thoroughfare)
+                     {
+                         street = [@"" stringByAppendingFormat:@"%@", placemark.thoroughfare];
+                     }
+
+                     NSString *address = [@"" stringByAppendingFormat:@"%@, %@", street, city];
+
+                     annotation.subtitle = address;
+                 }
+             }];
 }
 
 @end

@@ -22,6 +22,7 @@
 #pragma mark - PROPERTIES
 
 @property(nonatomic, strong, readonly) CLLocationManager *locationManager;
+@property(nonatomic, strong, readonly) CLGeocoder *geocoder;
 
 #pragma mark - CLASS METHODS
 
