@@ -262,13 +262,19 @@
         elementLongitude = [element valueForKey:@"lon"];
 
         elementName = [element valueForKeyPath:@"tags.name"];
-        elementType = [element valueForKeyPath:@"tags.amenity"];
+        elementType = NSLocalizedString([element valueForKeyPath:@"tags.amenity"], nil);
 
         annotation = [[AmenityAnnotation alloc] initWithLatitude:[elementLatitude doubleValue]
                                                        Longitude:[elementLongitude doubleValue]];
 
-        annotation.title = elementName ? elementName : elementType;
-        annotation.subtitle = elementName ? elementType : nil;
+        if (elementName)
+        {
+            annotation.title = [NSString stringWithFormat:@"%@ (%@)", elementName, elementType];
+        }
+        else
+        {
+            annotation.title = [NSString stringWithFormat:@"%@", elementType];
+        }
 
         [self.mapAmenityAnnotations addObject:annotation];
     }
@@ -292,7 +298,7 @@
     }
 }
 
-- (void)reverseGeocodeAnnotation:(MKPointAnnotation *)annotation
+- (void)reverseGeocodeAnnotation:(AmenityAnnotation *)annotation
 {
     [self.sharedNetworkIndicatorManager networkActivityDidStart];
 
@@ -310,21 +316,24 @@
 
                  if (!error)
                  {
-                     NSString *city, *street = @"";
+                     NSString *address = @"";
 
                      CLPlacemark *placemark = [placemarks lastObject];
 
-                     if (placemark.locality)
-                     {
-                         city = [@"" stringByAppendingFormat:@"%@", placemark.locality];
-                     }
-
                      if (placemark.thoroughfare)
                      {
-                         street = [@"" stringByAppendingFormat:@"%@", placemark.thoroughfare];
+                         address = [address stringByAppendingFormat:@"%@, ", placemark.thoroughfare];
                      }
 
-                     NSString *address = [@"" stringByAppendingFormat:@"%@, %@", street, city];
+                     if (placemark.subThoroughfare)
+                     {
+                         address = [address stringByAppendingFormat:@"%@, ", placemark.subThoroughfare];
+                     }
+
+                     if (placemark.locality)
+                     {
+                         address = [address stringByAppendingFormat:@"%@", placemark.locality];
+                     }
 
                      annotation.subtitle = address;
                  }

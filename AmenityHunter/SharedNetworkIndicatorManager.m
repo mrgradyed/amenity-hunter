@@ -20,6 +20,14 @@
 
 @import UIKit;
 
+@interface SharedNetworkIndicatorManager ()
+
+#pragma mark - PROPERTIES
+
+@property(nonatomic) NSInteger networkActivitiesCount;
+
+@end
+
 @implementation SharedNetworkIndicatorManager
 
 #pragma mark - ACCESSORS

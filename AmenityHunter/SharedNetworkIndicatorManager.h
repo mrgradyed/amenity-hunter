@@ -20,10 +20,6 @@
 
 @interface SharedNetworkIndicatorManager : NSObject
 
-#pragma mark - PUBLIC PROPERTIES
-
-@property(nonatomic) NSInteger networkActivitiesCount;
-
 #pragma mark - PUBLIC METHODS
 
 - (void)networkActivityDidStart;
